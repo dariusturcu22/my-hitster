@@ -1,0 +1,49 @@
+# --- IDEs ---
+.idea/
+.vscode/
+*.swp
+*.iml
+
+# --- Environment Secrets ---
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# --- Backend (Spring Boot / Java) ---
+backend/target/
+backend/build/
+backend/.mvn/
+backend/mvnw
+backend/mvnw.cmd
+*.class
+*.jar
+*.war
+
+# --- Frontend (Next.js / Node) ---
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/.vercel/
+frontend/npm-debug.log*
+frontend/yarn-error.log*
+
+# --- Mobile (Flutter) ---
+mobile/.dart_tool/
+mobile/.flutter-plugins
+mobile/.flutter-plugins-dependencies
+mobile/.packages
+mobile/build/
+mobile/ios/Flutter/Generated.xcconfig
+mobile/ios/Flutter/flutter_export_environment.sh
+mobile/android/app/src/main/res/values/strings.xml
+mobile/android/local.properties
+mobile/ios/Pods/
+mobile/*.ipa
+mobile/*.apk
+
+# --- OS Specific ---
+.DS_Store
+Thumbs.db
