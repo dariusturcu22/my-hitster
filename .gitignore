@@ -21,15 +21,6 @@ backend/mvnw.cmd
 *.jar
 *.war
 
-# --- Frontend (Next.js / Node) ---
-frontend/node_modules/
-frontend/.next/
-frontend/out/
-frontend/build/
-frontend/.vercel/
-frontend/npm-debug.log*
-frontend/yarn-error.log*
-
 # --- Mobile (Flutter) ---
 mobile/.dart_tool/
 mobile/.flutter-plugins
