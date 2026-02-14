@@ -5,10 +5,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.dariusturcu.backend.model.playlist.Playlist;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 @Entity
 @Getter
 @Setter
@@ -24,6 +20,7 @@ public class Song {
     private String gradientColor1;
     private String gradientColor2;
 
-    @ManyToMany(mappedBy = "songs")
-    private Set<Playlist> playlists = new HashSet<>();
+    @ManyToOne
+    @JoinColumn(name = "playlist_id", nullable = false)
+    private Playlist playlist;
 }

@@ -7,7 +7,9 @@ import lombok.Setter;
 import org.dariusturcu.backend.model.song.Song;
 import org.dariusturcu.backend.model.user.User;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -20,14 +22,19 @@ public class Playlist {
     private Long id;
     private String name;
 
-    @ManyToMany
-    @JoinTable(
-            name = "playlist_songs",
-            joinColumns = @JoinColumn(name = "playlist_id"),
-            inverseJoinColumns = @JoinColumn(name = "song_id")
-    )
-    private Set<Song> songs = new HashSet<>();
+    @OneToMany(mappedBy = "playlist", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Song> songs = new ArrayList<>();
 
     @ManyToMany(mappedBy = "playlists")
     private Set<User> users = new HashSet<>();
+
+    public void addSong(Song song) {
+        songs.add(song);
+        song.setPlaylist(this);
+    }
+
+    public void removeSong(Song song) {
+        songs.remove(song);
+        song.setPlaylist(null);
+    }
 }
