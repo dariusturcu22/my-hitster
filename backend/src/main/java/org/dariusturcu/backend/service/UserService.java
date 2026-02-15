@@ -24,9 +24,6 @@ public class UserService {
         return null;
     }
 
-    public UserSummaryDTO createUser(CreateUserRequest request) {
-        return null;
-    }
 
     public UserSummaryDTO updateUser(Long userId, UpdateUserRequest request) {
         return null;
