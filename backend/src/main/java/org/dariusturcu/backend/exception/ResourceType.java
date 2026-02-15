@@ -3,7 +3,8 @@ package org.dariusturcu.backend.exception;
 public enum ResourceType {
     PLAYLIST("Playlist"),
     SONG("Song"),
-    USER("User");
+    USER("User"),
+    SONG_NOT_IN_PLAYLIST("Song");
 
     private final String displayName;
 

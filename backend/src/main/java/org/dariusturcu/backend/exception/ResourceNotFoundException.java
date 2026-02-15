@@ -8,4 +8,8 @@ public class ResourceNotFoundException extends RuntimeException {
     public ResourceNotFoundException(ResourceType resourceType, Long id) {
         super(resourceType.formatNotFoundMessage(id));
     }
+
+    public ResourceNotFoundException(ResourceType resourceType, Long songId, Long playlistId) {
+        super(resourceType.formatNotFoundMessage(songId) + " in Playlist {id=" + playlistId + "}");
+    }
 }

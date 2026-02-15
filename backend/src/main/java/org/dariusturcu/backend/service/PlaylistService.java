@@ -13,11 +13,10 @@ import org.dariusturcu.backend.model.song.SongDTO;
 import org.dariusturcu.backend.model.song.UpdateSongRequest;
 import org.dariusturcu.backend.repository.PlaylistRepository;
 
+import org.dariusturcu.backend.repository.SongRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
-
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +25,7 @@ import java.util.Objects;
 public class PlaylistService {
 
     private final PlaylistRepository playlistRepository;
+    private final SongRepository songRepository;
     private final PlaylistMapper playlistMapper;
     private final SongMapper songMapper;
 
@@ -34,11 +34,15 @@ public class PlaylistService {
                 .orElseThrow(() -> new ResourceNotFoundException(ResourceType.PLAYLIST, playlistId));
     }
 
-    private Song findSong(Playlist playlist, Long songId) {
-        return playlist.getSongs().stream()
-                .filter(song -> Objects.equals(song.getId(), songId))
-                .findFirst()
+    private Song findSong(Long songId) {
+        return songRepository.findById(songId)
                 .orElseThrow(() -> new ResourceNotFoundException(ResourceType.SONG, songId));
+    }
+
+    private void checkSongBelongsToPlaylist(Song song, Long playlistId) {
+        if (!song.getPlaylist().getId().equals(playlistId)) {
+            throw new ResourceNotFoundException(ResourceType.SONG_NOT_IN_PLAYLIST, song.getId(), playlistId);
+        }
     }
 
     @Transactional(readOnly = true)
@@ -68,9 +72,11 @@ public class PlaylistService {
             Long playlistId,
             Long songId) {
 
-        Playlist playlist = findPlaylist(playlistId);
+        Playlist _ = findPlaylist(playlistId);
 
-        Song song = findSong(playlist, songId);
+        Song song = findSong(songId);
+
+        checkSongBelongsToPlaylist(song, playlistId);
 
         return songMapper.toDTO(song);
     }
@@ -82,12 +88,11 @@ public class PlaylistService {
         Playlist playlist = findPlaylist(playlistId);
 
         Song newSong = songMapper.toEntity(request);
+        newSong.setPlaylist(playlist);
 
-        playlist.addSong(newSong);
+        Song savedSong = songRepository.save(newSong);
 
-        playlistRepository.save(playlist);
-
-        return songMapper.toDTO(newSong);
+        return songMapper.toDTO(savedSong);
     }
 
     public SongDTO updateSong(
@@ -97,7 +102,9 @@ public class PlaylistService {
 
         Playlist playlist = findPlaylist(playlistId);
 
-        Song song = findSong(playlist, songId);
+        Song song = findSong(songId);
+
+        checkSongBelongsToPlaylist(song, playlistId);
 
         song = songMapper.updateEntity(song, request);
 
@@ -112,7 +119,9 @@ public class PlaylistService {
 
         Playlist playlist = findPlaylist(playlistId);
 
-        Song song = findSong(playlist, songId);
+        Song song = findSong(songId);
+
+        checkSongBelongsToPlaylist(song, playlistId);
 
         playlist.removeSong(song);
 

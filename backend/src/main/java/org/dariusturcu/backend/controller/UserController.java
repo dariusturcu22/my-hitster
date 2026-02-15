@@ -3,7 +3,6 @@ package org.dariusturcu.backend.controller;
 
 import org.dariusturcu.backend.model.playlist.PlaylistDetailDTO;
 import org.dariusturcu.backend.model.playlist.PlaylistSummaryDTO;
-import org.dariusturcu.backend.model.user.CreateUserRequest;
 import org.dariusturcu.backend.model.user.UpdateUserRequest;
 import org.dariusturcu.backend.model.user.UserDetailDTO;
 import org.dariusturcu.backend.model.user.UserSummaryDTO;
@@ -34,13 +33,6 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-    @Operation(summary = "Create a new user")
-    @PostMapping
-    public ResponseEntity<UserSummaryDTO> createUser(
-            @RequestBody CreateUserRequest request) {
-        UserSummaryDTO newUser = userService.createUser(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(newUser);
-    }
 
     @Operation(summary = "Update user information")
     @PatchMapping("/{userId}")
