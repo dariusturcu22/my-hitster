@@ -1,7 +1,5 @@
 package org.dariusturcu.backend.service;
 
-
-import lombok.RequiredArgsConstructor;
 import org.dariusturcu.backend.exception.ResourceNotFoundException;
 import org.dariusturcu.backend.exception.ResourceType;
 import org.dariusturcu.backend.model.mapper.PlaylistMapper;
@@ -14,8 +12,10 @@ import org.dariusturcu.backend.model.song.Song;
 import org.dariusturcu.backend.model.song.SongDTO;
 import org.dariusturcu.backend.model.song.UpdateSongRequest;
 import org.dariusturcu.backend.repository.PlaylistRepository;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import lombok.RequiredArgsConstructor;
 
 import java.util.Objects;
 
@@ -46,6 +46,7 @@ public class PlaylistService {
             Long playlistId) {
 
         Playlist playlist = findPlaylist(playlistId);
+
         return playlistMapper.toDetailDTO(playlist);
     }
 
@@ -55,10 +56,9 @@ public class PlaylistService {
 
         Playlist playlist = findPlaylist(playlistId);
 
-        if (request.name() != null) {
-            playlist.setName(request.name());
-            playlistRepository.save(playlist);
-        }
+        playlist = playlistMapper.updateEntity(playlist, request);
+
+        playlistRepository.save(playlist);
 
         return playlistMapper.toDetailDTO(playlist);
     }

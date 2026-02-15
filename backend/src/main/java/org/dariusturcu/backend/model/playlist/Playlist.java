@@ -1,11 +1,11 @@
 package org.dariusturcu.backend.model.playlist;
 
-import jakarta.persistence.*;
-import lombok.Generated;
-import lombok.Getter;
-import lombok.Setter;
 import org.dariusturcu.backend.model.song.Song;
 import org.dariusturcu.backend.model.user.User;
+
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.HashSet;

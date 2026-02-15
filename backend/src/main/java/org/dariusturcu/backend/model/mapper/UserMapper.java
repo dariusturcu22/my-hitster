@@ -1,8 +1,7 @@
 package org.dariusturcu.backend.model.mapper;
 
-import org.dariusturcu.backend.model.user.User;
-import org.dariusturcu.backend.model.user.UserDetailDTO;
-import org.dariusturcu.backend.model.user.UserSummaryDTO;
+import org.dariusturcu.backend.model.user.*;
+
 import org.springframework.stereotype.Component;
 
 @Component
@@ -18,5 +17,15 @@ public class UserMapper {
         return new UserDetailDTO(
 
         );
+    }
+
+    public User toEntity(CreateUserRequest request) {
+        return new User(
+
+        );
+    }
+
+    public User updateEntity(User user, UpdateUserRequest request) {
+        return user;
     }
 }

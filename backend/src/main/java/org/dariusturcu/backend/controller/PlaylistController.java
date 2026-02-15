@@ -1,16 +1,18 @@
 package org.dariusturcu.backend.controller;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
 import org.dariusturcu.backend.model.playlist.PlaylistDetailDTO;
 import org.dariusturcu.backend.model.playlist.UpdatePlaylistRequest;
 import org.dariusturcu.backend.model.song.CreateSongRequest;
 import org.dariusturcu.backend.model.song.SongDTO;
 import org.dariusturcu.backend.model.song.UpdateSongRequest;
 import org.dariusturcu.backend.service.PlaylistService;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
+
 
 @RestController
 @RequestMapping("/api/playlists")

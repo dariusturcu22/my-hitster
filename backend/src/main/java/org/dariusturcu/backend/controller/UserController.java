@@ -1,8 +1,6 @@
 package org.dariusturcu.backend.controller;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
+
 import org.dariusturcu.backend.model.playlist.PlaylistDetailDTO;
 import org.dariusturcu.backend.model.playlist.PlaylistSummaryDTO;
 import org.dariusturcu.backend.model.user.CreateUserRequest;
@@ -10,9 +8,13 @@ import org.dariusturcu.backend.model.user.UpdateUserRequest;
 import org.dariusturcu.backend.model.user.UserDetailDTO;
 import org.dariusturcu.backend.model.user.UserSummaryDTO;
 import org.dariusturcu.backend.service.UserService;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 

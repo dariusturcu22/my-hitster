@@ -1,10 +1,12 @@
 package org.dariusturcu.backend.model.mapper;
 
-import lombok.RequiredArgsConstructor;
 import org.dariusturcu.backend.model.playlist.Playlist;
 import org.dariusturcu.backend.model.playlist.PlaylistDetailDTO;
 import org.dariusturcu.backend.model.playlist.PlaylistSummaryDTO;
+import org.dariusturcu.backend.model.playlist.UpdatePlaylistRequest;
+
 import org.springframework.stereotype.Component;
+import lombok.RequiredArgsConstructor;
 
 import java.util.stream.Collectors;
 
@@ -32,5 +34,12 @@ public class PlaylistMapper {
                         .map(userMapper::toSummaryDTO)
                         .collect(Collectors.toSet())
         );
+    }
+
+    public Playlist updateEntity(Playlist playlist, UpdatePlaylistRequest request) {
+        if (request.name() != null) {
+            playlist.setName(request.name());
+        }
+        return playlist;
     }
 }

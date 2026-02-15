@@ -1,6 +1,6 @@
 package org.dariusturcu.backend.service;
 
-import lombok.RequiredArgsConstructor;
+
 import org.dariusturcu.backend.model.playlist.PlaylistDetailDTO;
 import org.dariusturcu.backend.model.playlist.PlaylistSummaryDTO;
 import org.dariusturcu.backend.model.user.CreateUserRequest;
@@ -9,7 +9,9 @@ import org.dariusturcu.backend.model.user.UserDetailDTO;
 import org.dariusturcu.backend.model.user.UserSummaryDTO;
 import org.dariusturcu.backend.repository.PlaylistRepository;
 import org.dariusturcu.backend.repository.UserRepository;
+
 import org.springframework.stereotype.Service;
+import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
