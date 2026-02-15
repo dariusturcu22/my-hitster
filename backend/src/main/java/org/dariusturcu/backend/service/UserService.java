@@ -1,13 +1,12 @@
 package org.dariusturcu.backend.service;
 
 import lombok.RequiredArgsConstructor;
-import org.dariusturcu.backend.exception.ResourceNotFoundException;
 import org.dariusturcu.backend.model.playlist.PlaylistDetailDTO;
 import org.dariusturcu.backend.model.playlist.PlaylistSummaryDTO;
 import org.dariusturcu.backend.model.user.CreateUserRequest;
 import org.dariusturcu.backend.model.user.UpdateUserRequest;
-import org.dariusturcu.backend.model.user.User;
-import org.dariusturcu.backend.model.user.UserDTO;
+import org.dariusturcu.backend.model.user.UserDetailDTO;
+import org.dariusturcu.backend.model.user.UserSummaryDTO;
 import org.dariusturcu.backend.repository.PlaylistRepository;
 import org.dariusturcu.backend.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -20,15 +19,15 @@ public class UserService {
     private final UserRepository userRepository;
     private final PlaylistRepository playlistRepository;
 
-    public UserDTO getUserById(Long userId) {
+    public UserDetailDTO getUserById(Long userId) {
         return null;
     }
 
-    public UserDTO createUser(CreateUserRequest request) {
+    public UserSummaryDTO createUser(CreateUserRequest request) {
         return null;
     }
 
-    public UserDTO updateUser(Long userId, UpdateUserRequest request) {
+    public UserSummaryDTO updateUser(Long userId, UpdateUserRequest request) {
         return null;
     }
 

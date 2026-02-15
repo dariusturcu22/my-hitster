@@ -21,42 +21,54 @@ public class PlaylistController {
 
     @Operation(summary = "Get playlist information")
     @GetMapping("/{playlistId}")
-    public ResponseEntity<PlaylistDetailDTO> getPlaylist(@PathVariable Long playlistId) {
+    public ResponseEntity<PlaylistDetailDTO> getPlaylist(
+            @PathVariable Long playlistId) {
         PlaylistDetailDTO playlist = playlistService.getPlaylist(playlistId);
         return ResponseEntity.ok(playlist);
     }
 
     @Operation(summary = "Update playlist information")
     @PatchMapping("/{playlistId}")
-    public ResponseEntity<PlaylistDetailDTO> updatePlaylist(@PathVariable Long playlistId, @RequestBody UpdatePlaylistRequest request) {
+    public ResponseEntity<PlaylistDetailDTO> updatePlaylist(
+            @PathVariable Long playlistId,
+            @RequestBody UpdatePlaylistRequest request) {
         PlaylistDetailDTO updatedPlaylist = playlistService.updatePlaylist(playlistId, request);
         return ResponseEntity.ok(updatedPlaylist);
     }
 
     @Operation(summary = "Get information about a particular song in the playlist")
     @GetMapping("/{playlistId}/songs/{songId}")
-    public ResponseEntity<SongDTO> getSong(@PathVariable Long playlistId, @PathVariable Long songId) {
+    public ResponseEntity<SongDTO> getSong(
+            @PathVariable Long playlistId,
+            @PathVariable Long songId) {
         SongDTO song = playlistService.getSong(playlistId, songId);
         return ResponseEntity.ok(song);
     }
 
     @Operation(summary = "Add a new song to the playlist")
     @PostMapping("/{playlistId}/songs")
-    public ResponseEntity<SongDTO> createSong(@PathVariable Long playlistId, @RequestBody CreateSongRequest request) {
+    public ResponseEntity<SongDTO> createSong(
+            @PathVariable Long playlistId,
+            @RequestBody CreateSongRequest request) {
         SongDTO newSong = playlistService.createSong(playlistId, request);
         return ResponseEntity.ok(newSong);
     }
 
     @Operation(summary = "Edit information about a particular song in the playlist")
     @PatchMapping("/{playlistId}/songs/{songId}")
-    public ResponseEntity<SongDTO> updateSong(@PathVariable Long playlistId, @PathVariable Long songId, @RequestBody UpdateSongRequest request) {
+    public ResponseEntity<SongDTO> updateSong(
+            @PathVariable Long playlistId,
+            @PathVariable Long songId,
+            @RequestBody UpdateSongRequest request) {
         SongDTO song = playlistService.updateSong(playlistId, songId, request);
         return ResponseEntity.ok(song);
     }
 
     @Operation(summary = "Delete song from the playlist")
     @DeleteMapping("/{playlistId}/songs/{songId}")
-    public ResponseEntity<Void> deleteSong(@PathVariable Long playlistId, @PathVariable Long songId) {
+    public ResponseEntity<Void> deleteSong(
+            @PathVariable Long playlistId,
+            @PathVariable Long songId) {
         playlistService.deleteSong(playlistId, songId);
         return ResponseEntity.noContent().build();
     }
