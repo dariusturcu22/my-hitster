@@ -11,9 +11,11 @@ import org.dariusturcu.backend.model.song.CreateSongRequest;
 import org.dariusturcu.backend.model.song.Song;
 import org.dariusturcu.backend.model.song.SongDTO;
 import org.dariusturcu.backend.model.song.UpdateSongRequest;
+import org.dariusturcu.backend.model.user.User;
 import org.dariusturcu.backend.repository.PlaylistRepository;
 
 import org.dariusturcu.backend.repository.SongRepository;
+import org.dariusturcu.backend.security.SecurityUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +41,17 @@ public class PlaylistService {
                 .orElseThrow(() -> new ResourceNotFoundException(ResourceType.SONG, songId));
     }
 
+    private void checkPlaylistAccess(Playlist playlist) {
+        User currentUser = SecurityUtils.getCurrentUser();
+
+        boolean hasAccess = playlist.getUsers().stream()
+                .anyMatch(user -> user.getId().equals(currentUser.getId()));
+
+        if (!hasAccess) {
+            throw new RuntimeException("Access denied: You are not a member of this playlist");
+        }
+    }
+
     private void checkSongBelongsToPlaylist(Song song, Long playlistId) {
         if (!song.getPlaylist().getId().equals(playlistId)) {
             throw new ResourceNotFoundException(ResourceType.SONG_NOT_IN_PLAYLIST, song.getId(), playlistId);
@@ -50,7 +63,7 @@ public class PlaylistService {
             Long playlistId) {
 
         Playlist playlist = findPlaylist(playlistId);
-
+        checkPlaylistAccess(playlist);
         return playlistMapper.toDetailDTO(playlist);
     }
 
@@ -60,6 +73,7 @@ public class PlaylistService {
 
         Playlist playlist = findPlaylist(playlistId);
 
+        checkPlaylistAccess(playlist);
         playlist = playlistMapper.updateEntity(playlist, request);
 
         playlistRepository.save(playlist);
@@ -72,8 +86,9 @@ public class PlaylistService {
             Long playlistId,
             Long songId) {
 
-        Playlist _ = findPlaylist(playlistId);
+        Playlist playlist = findPlaylist(playlistId);
 
+        checkPlaylistAccess(playlist);
         Song song = findSong(songId);
 
         checkSongBelongsToPlaylist(song, playlistId);
@@ -86,7 +101,7 @@ public class PlaylistService {
             CreateSongRequest request) {
 
         Playlist playlist = findPlaylist(playlistId);
-
+        checkPlaylistAccess(playlist);
         Song newSong = songMapper.toEntity(request);
         newSong.setPlaylist(playlist);
 
@@ -101,7 +116,7 @@ public class PlaylistService {
             UpdateSongRequest request) {
 
         Playlist playlist = findPlaylist(playlistId);
-
+        checkPlaylistAccess(playlist);
         Song song = findSong(songId);
 
         checkSongBelongsToPlaylist(song, playlistId);
@@ -118,7 +133,7 @@ public class PlaylistService {
             Long songId) {
 
         Playlist playlist = findPlaylist(playlistId);
-
+        checkPlaylistAccess(playlist);
         Song song = findSong(songId);
 
         checkSongBelongsToPlaylist(song, playlistId);

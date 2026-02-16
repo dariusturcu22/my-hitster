@@ -1,6 +1,7 @@
 package org.dariusturcu.backend.controller;
 
 
+import jakarta.validation.Valid;
 import org.dariusturcu.backend.model.playlist.PlaylistDetailDTO;
 import org.dariusturcu.backend.model.playlist.PlaylistSummaryDTO;
 import org.dariusturcu.backend.model.user.UpdateUserRequest;
@@ -25,7 +26,14 @@ import java.util.List;
 public class UserController {
     private final UserService userService;
 
-    @Operation(summary = "Get user information")
+    @Operation(summary = "Get current user information")
+    @GetMapping("/me")
+    public ResponseEntity<UserDetailDTO> getCurrentUser() {
+        UserDetailDTO user = userService.getCurrentUser();
+        return ResponseEntity.ok(user);
+    }
+
+    @Operation(summary = "Get user information by ID")
     @GetMapping("/{userId}")
     public ResponseEntity<UserDetailDTO> getUser(
             @PathVariable Long userId) {
@@ -33,55 +41,48 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-
-    @Operation(summary = "Update user information")
-    @PatchMapping("/{userId}")
-    public ResponseEntity<UserSummaryDTO> updateUser(
-            @PathVariable Long userId,
-            @RequestBody UpdateUserRequest request) {
-        UserSummaryDTO updatedUser = userService.updateUser(userId, request);
+    @Operation(summary = "Update current user information")
+    @PatchMapping("/me")
+    public ResponseEntity<UserDetailDTO> updateUser(
+            @Valid @RequestBody UpdateUserRequest request) {
+        UserDetailDTO updatedUser = userService.updateUser(request);
         return ResponseEntity.ok().body(updatedUser);
     }
 
-    @Operation(summary = "Delete a user")
-    @DeleteMapping("/{userId}")
-    public ResponseEntity<Void> deleteUser(
-            @PathVariable Long userId) {
-        userService.deleteUser(userId);
+    @Operation(summary = "Delete current user")
+    @DeleteMapping("/me")
+    public ResponseEntity<Void> deleteUser() {
+        userService.deleteUser();
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Create a new playlist for a user")
-    @PostMapping("/{userId}/playlists")
-    public ResponseEntity<PlaylistDetailDTO> createPlaylist(
-            @PathVariable Long userId) {
-        PlaylistDetailDTO newPlaylist = userService.createPlaylist(userId);
+    @Operation(summary = "Create new playlist for current user")
+    @PostMapping("/me/playlists")
+    public ResponseEntity<PlaylistDetailDTO> createPlaylist() {
+        PlaylistDetailDTO newPlaylist = userService.createPlaylist();
         return ResponseEntity.status(HttpStatus.CREATED).body(newPlaylist);
     }
 
-    @Operation(summary = "Get the list of all playlists of a user")
-    @GetMapping("/{userId}/playlists")
-    public ResponseEntity<List<PlaylistSummaryDTO>> getUserPlaylists(
-            @PathVariable Long userId) {
-        List<PlaylistSummaryDTO> userPlaylists = userService.getUserPlaylists(userId);
+    @Operation(summary = "Get all playlists of current user")
+    @GetMapping("/me/playlists")
+    public ResponseEntity<List<PlaylistSummaryDTO>> getUserPlaylists() {
+        List<PlaylistSummaryDTO> userPlaylists = userService.getUserPlaylists();
         return ResponseEntity.ok(userPlaylists);
     }
 
     @Operation(summary = "Join an existing playlist")
-    @PostMapping("/{userId}/playlists/{playlistId}")
+    @PostMapping("/me/playlists/{playlistId}")
     public ResponseEntity<PlaylistSummaryDTO> joinPlaylist(
-            @PathVariable Long userId,
             @PathVariable Long playlistId) {
-        PlaylistSummaryDTO joinedPlaylist = userService.joinPlaylist(userId, playlistId);
+        PlaylistSummaryDTO joinedPlaylist = userService.joinPlaylist(playlistId);
         return ResponseEntity.ok(joinedPlaylist);
     }
 
     @Operation(summary = "Leave playlist")
-    @DeleteMapping("/{userId}/playlists/{playlistId}")
+    @DeleteMapping("/me/playlists/{playlistId}")
     public ResponseEntity<Void> leavePlaylist(
-            @PathVariable Long userId,
             @PathVariable Long playlistId) {
-        userService.leavePlaylist(userId, playlistId);
+        userService.leavePlaylist(playlistId);
         return ResponseEntity.noContent().build();
     }
 }

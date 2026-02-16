@@ -37,4 +37,12 @@ public class Playlist {
         songs.remove(song);
         song.setPlaylist(null);
     }
+
+    public void addUser(User user) {
+        users.add(user);
+    }
+
+    public void removeUser(User user) {
+        users.remove(user);
+    }
 }

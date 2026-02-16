@@ -1,0 +1,57 @@
+package org.dariusturcu.backend.security.oauth2;
+
+import lombok.RequiredArgsConstructor;
+import org.dariusturcu.backend.model.user.AuthProvider;
+import org.dariusturcu.backend.model.user.Role;
+import org.dariusturcu.backend.model.user.User;
+import org.dariusturcu.backend.repository.UserRepository;
+import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.stereotype.Service;
+
+import java.util.Optional;
+
+@Service
+@RequiredArgsConstructor
+public class CustomOAuth2UserService extends DefaultOAuth2UserService {
+    private final UserRepository userRepository;
+
+    @Override
+    public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
+        OAuth2User oAuth2User = super.loadUser(userRequest);
+
+        String registrationId = userRequest.getClientRegistration().getRegistrationId();
+        OAuth2UserInfo oAuth2UserInfo = new GoogleOAuth2UserInfo(oAuth2User.getAttributes());
+
+        User user = processOAuth2User(registrationId, oAuth2UserInfo);
+
+        return new CustomOAuth2User(user, oAuth2User.getAttributes());
+    }
+
+    private User processOAuth2User(String registrationId, OAuth2UserInfo oAuth2UserInfo) {
+        AuthProvider provider = AuthProvider.valueOf(registrationId.toUpperCase());
+
+        Optional<User> userOptional = userRepository.findUserByAuthProviderAndAuthProviderId(
+                provider,
+                oAuth2UserInfo.getId()
+        );
+
+        User user;
+        if (userOptional.isPresent()) {
+            user = userOptional.get();
+            user.setEmail(oAuth2UserInfo.getEmail());
+            user.setUsername(oAuth2UserInfo.getName());
+        } else {
+            user = new User();
+            user.setAuthProvider(provider);
+            user.setAuthProviderId(oAuth2UserInfo.getId());
+            user.setUsername(oAuth2UserInfo.getName());
+            user.setEmail(oAuth2UserInfo.getEmail());
+            user.setRole(Role.USER);
+        }
+
+        return userRepository.save(user);
+    }
+}

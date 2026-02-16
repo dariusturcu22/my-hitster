@@ -1,51 +1,143 @@
 package org.dariusturcu.backend.service;
 
 
+import org.dariusturcu.backend.exception.ResourceNotFoundException;
+import org.dariusturcu.backend.exception.ResourceType;
+import org.dariusturcu.backend.model.mapper.PlaylistMapper;
+import org.dariusturcu.backend.model.mapper.UserMapper;
+import org.dariusturcu.backend.model.playlist.Playlist;
 import org.dariusturcu.backend.model.playlist.PlaylistDetailDTO;
 import org.dariusturcu.backend.model.playlist.PlaylistSummaryDTO;
 import org.dariusturcu.backend.model.user.UpdateUserRequest;
+import org.dariusturcu.backend.model.user.User;
 import org.dariusturcu.backend.model.user.UserDetailDTO;
 import org.dariusturcu.backend.model.user.UserSummaryDTO;
 import org.dariusturcu.backend.repository.PlaylistRepository;
 import org.dariusturcu.backend.repository.UserRepository;
 
+import org.dariusturcu.backend.security.SecurityUtils;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class UserService {
     private final UserRepository userRepository;
     private final PlaylistRepository playlistRepository;
+    private final UserMapper userMapper;
+    private final PlaylistMapper playlistMapper;
 
+    @Transactional(readOnly = true)
+    public UserDetailDTO getCurrentUser() {
+        User user = SecurityUtils.getCurrentUser();
+        user.getPlaylists().size();
+        return userMapper.toDetailDTO(user);
+    }
+
+    @Transactional(readOnly = true)
     public UserDetailDTO getUserById(Long userId) {
-        return null;
+        if (!SecurityUtils.isCurrentUser(userId)) {
+            throw new RuntimeException("Access denied");
+            // TODO custom exception
+        }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(ResourceType.USER, userId));
+        user.getPlaylists().size();
+        return userMapper.toDetailDTO(user);
     }
 
+    public UserDetailDTO updateUser(UpdateUserRequest request) {
+        User user = SecurityUtils.getCurrentUser();
 
-    public UserSummaryDTO updateUser(Long userId, UpdateUserRequest request) {
-        return null;
+        if (request.username() != null) {
+            if (userRepository.existsUserByUsername(request.username()) &&
+                    !user.getUsername().equals(request.username())) {
+                throw new RuntimeException("Username already exists");
+            }
+            user.setUsername(request.username());
+        }
+
+        if (request.email() != null) {
+            if (userRepository.existsUserByEmail(request.email()) &&
+                    !user.getEmail().equals(request.email())) {
+                throw new RuntimeException("Email already exists");
+            }
+            user.setEmail(request.email());
+        }
+
+        User updatedUser = userRepository.save(user);
+        user.getPlaylists().size();
+        return userMapper.toDetailDTO(updatedUser);
     }
 
-    public void deleteUser(Long userId) {
-
+    public void deleteUser() {
+        User user = SecurityUtils.getCurrentUser();
+        userRepository.delete(user);
     }
 
-    public PlaylistDetailDTO createPlaylist(Long userId) {
-        return null;
+    public PlaylistDetailDTO createPlaylist() {
+        User user = SecurityUtils.getCurrentUser();
+
+        Playlist playlist = new Playlist();
+        playlist.setName("New playlist");
+        playlist.addUser(user);
+
+        Playlist savedPlaylist = playlistRepository.save(playlist);
+
+        user.getPlaylists().add(savedPlaylist);
+        userRepository.save(user);
+
+        return playlistMapper.toDetailDTO(playlist);
     }
 
-    public List<PlaylistSummaryDTO> getUserPlaylists(Long userId) {
-        return null;
+    @Transactional(readOnly = true)
+    public List<PlaylistSummaryDTO> getUserPlaylists() {
+        // TODO wrapper function for all of these
+        User user = SecurityUtils.getCurrentUser();
+
+        return user.getPlaylists().stream()
+                .map(playlistMapper::toSummaryDTO)
+                .toList();
     }
 
-    public PlaylistSummaryDTO joinPlaylist(Long userId, Long playlistId) {
-        return null;
+    public PlaylistSummaryDTO joinPlaylist(Long playlistId) {
+        User user = SecurityUtils.getCurrentUser();
+
+        Playlist playlist = playlistRepository.findById(playlistId)
+                .orElseThrow(() -> new ResourceNotFoundException(ResourceType.PLAYLIST, playlistId));
+
+        boolean alreadyMember = user.getPlaylists().stream()
+                .anyMatch(p -> p.getId().equals(playlistId));
+
+        if (alreadyMember) {
+            throw new RuntimeException("User is already a member of this playlist");
+        }
+
+        user.getPlaylists().add(playlist);
+        playlist.addUser(user);
+        userRepository.save(user);
+
+        return playlistMapper.toSummaryDTO(playlist);
     }
 
-    public void leavePlaylist(Long userId, Long playlistId) {
+    public void leavePlaylist(Long playlistId) {
+        User user = SecurityUtils.getCurrentUser();
 
+        Playlist playlist = playlistRepository.findById(playlistId)
+                .orElseThrow(() -> new ResourceNotFoundException(ResourceType.PLAYLIST, playlistId));
+
+        boolean removed = user.getPlaylists().removeIf(p -> p.getId().equals(playlistId));
+
+        if (!removed) {
+            throw new RuntimeException("User is not a member of this playlist");
+        }
+
+        playlist.removeUser(user);
+
+        userRepository.save(user);
     }
 }

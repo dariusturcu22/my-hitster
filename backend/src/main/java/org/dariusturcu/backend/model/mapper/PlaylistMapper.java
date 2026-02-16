@@ -5,16 +5,21 @@ import org.dariusturcu.backend.model.playlist.PlaylistDetailDTO;
 import org.dariusturcu.backend.model.playlist.PlaylistSummaryDTO;
 import org.dariusturcu.backend.model.playlist.UpdatePlaylistRequest;
 
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
 
 import java.util.stream.Collectors;
 
 @Component
-@RequiredArgsConstructor
 public class PlaylistMapper {
     private final SongMapper songMapper;
     private final UserMapper userMapper;
+
+    public PlaylistMapper(SongMapper songMapper, @Lazy UserMapper userMapper) {
+        this.songMapper = songMapper;
+        this.userMapper = userMapper;
+    }
 
     public PlaylistSummaryDTO toSummaryDTO(Playlist playlist) {
         return new PlaylistSummaryDTO(

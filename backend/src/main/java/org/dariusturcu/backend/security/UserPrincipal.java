@@ -1,5 +1,6 @@
 package org.dariusturcu.backend.security;
 
+import lombok.Getter;
 import org.dariusturcu.backend.model.user.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -8,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
+@Getter
 public class UserPrincipal implements UserDetails {
     private final User user;
 
@@ -49,4 +51,5 @@ public class UserPrincipal implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
+
 }
