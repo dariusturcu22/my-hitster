@@ -22,7 +22,8 @@ public class SongMapper {
                 new UserSummaryDTO(
                         song.getAddedBy().getId(),
                         song.getAddedBy().getUsername()
-                )
+                ),
+                song.getFlag()
         );
     }
 
@@ -55,6 +56,9 @@ public class SongMapper {
         }
         if (request.gradientColor2() != null) {
             song.setGradientColor2(request.gradientColor2());
+        }
+        if (request.flag() != null) {
+            song.setFlag(request.flag());
         }
         return song;
     }

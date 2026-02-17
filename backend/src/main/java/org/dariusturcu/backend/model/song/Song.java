@@ -22,6 +22,9 @@ public class Song {
     private String gradientColor1;
     private String gradientColor2;
 
+    @Enumerated(EnumType.STRING)
+    private Flag flag;
+
     @ManyToOne
     @JoinColumn(name = "playlist_id", nullable = false)
     private Playlist playlist;

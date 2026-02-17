@@ -6,5 +6,7 @@ public record UpdateSongRequest(
         int releaseYear,
         String youtubeId,
         String gradientColor1,
-        String gradientColor2) {
+        String gradientColor2,
+        Flag flag
+) {
 }
