@@ -84,6 +84,7 @@ public class UserService {
 
         Playlist playlist = new Playlist();
         playlist.setName("New playlist");
+        playlist.setColor("000000");
         playlist.addUser(user);
 
         Playlist savedPlaylist = playlistRepository.save(playlist);
@@ -96,7 +97,6 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public List<PlaylistSummaryDTO> getUserPlaylists() {
-        // TODO wrapper function for all of these
         User user = SecurityUtils.getCurrentUser();
 
         return user.getPlaylists().stream()

@@ -32,6 +32,7 @@ public class PlaylistMapper {
         return new PlaylistDetailDTO(
                 playlist.getId(),
                 playlist.getName(),
+                playlist.getColor(),
                 playlist.getSongs().stream()
                         .map(songMapper::toDTO)
                         .toList(),

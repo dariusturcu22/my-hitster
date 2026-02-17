@@ -9,6 +9,7 @@ import java.util.Set;
 public record PlaylistDetailDTO(
         Long id,
         String name,
+        String color,
         List<SongDTO> songs,
         Set<UserSummaryDTO> users) {
 }

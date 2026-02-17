@@ -18,7 +18,7 @@ import java.io.IOException;
 public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     private final JwtUtil jwtUtil;
 
-    @Value("{$app.oauth2.redirect-uri}")
+    @Value("${app.oauth2.redirect-uri}")
     private String redirectUri;
 
     @Override
