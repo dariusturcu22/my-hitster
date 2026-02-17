@@ -1,5 +1,7 @@
 package org.dariusturcu.backend.model.song;
 
+import org.dariusturcu.backend.model.user.UserSummaryDTO;
+
 public record SongDTO(
         Long id,
         String artist,
@@ -7,5 +9,7 @@ public record SongDTO(
         int releaseYear,
         String youtubeId,
         String gradientColor1,
-        String gradientColor2) {
+        String gradientColor2,
+        UserSummaryDTO addedBy
+) {
 }

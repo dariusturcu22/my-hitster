@@ -5,6 +5,7 @@ import org.dariusturcu.backend.model.playlist.Playlist;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.dariusturcu.backend.model.user.User;
 
 @Entity
 @Getter
@@ -24,4 +25,8 @@ public class Song {
     @ManyToOne
     @JoinColumn(name = "playlist_id", nullable = false)
     private Playlist playlist;
+
+    @ManyToOne
+    @JoinColumn(name = "added_by", nullable = false)
+    private User addedBy;
 }

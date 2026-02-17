@@ -5,6 +5,7 @@ import org.dariusturcu.backend.model.song.Song;
 import org.dariusturcu.backend.model.song.SongDTO;
 import org.dariusturcu.backend.model.song.UpdateSongRequest;
 
+import org.dariusturcu.backend.model.user.UserSummaryDTO;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -17,7 +18,11 @@ public class SongMapper {
                 song.getReleaseYear(),
                 song.getYoutubeId(),
                 song.getGradientColor1(),
-                song.getGradientColor2()
+                song.getGradientColor2(),
+                new UserSummaryDTO(
+                        song.getAddedBy().getId(),
+                        song.getAddedBy().getUsername()
+                )
         );
     }
 

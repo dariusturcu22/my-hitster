@@ -102,8 +102,11 @@ public class PlaylistService {
 
         Playlist playlist = findPlaylist(playlistId);
         checkPlaylistAccess(playlist);
+
+        User user = SecurityUtils.getCurrentUser();
         Song newSong = songMapper.toEntity(request);
         newSong.setPlaylist(playlist);
+        newSong.setAddedBy(user);
 
         Song savedSong = songRepository.save(newSong);
 
