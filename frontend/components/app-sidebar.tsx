@@ -1,9 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { AudioWaveform, SquareTerminal } from "lucide-react";
+import { AudioWaveform, Music, Plus, LogIn } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
-import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
 import {
   Sidebar,
@@ -11,47 +12,126 @@ import {
   SidebarFooter,
   SidebarHeader,
   SidebarRail,
-} from "@/components/ui/sidebar";
-import { useSidebar } from "@/components/ui/sidebar";
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  useSidebar,
+} from "@/components/shadcn/sidebar";
+import { Input } from "@/components/shadcn/input";
+import { Button } from "@/components/shadcn/button";
 
-// This is sample data.
-const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-  company: {
-    name: "Acme Inc",
-    logo: AudioWaveform,
-  },
-  navMain: [
-    {
-      title: "Playground",
-      url: "#",
-      icon: SquareTerminal,
-      isActive: true,
-      items: [
-        {
-          title: "History",
-          url: "#",
-        },
-        {
-          title: "Starred",
-          url: "#",
-        },
-        {
-          title: "Settings",
-          url: "#",
-        },
-      ],
-    },
-  ],
+// TODO replace with orval generated
+interface Playlist {
+  id: number;
+  name: string;
+  songCount: number;
+}
+
+interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
+  playlists?: Playlist[];
+  currentPlaylistId?: number;
+  onPlaylistCreate?: (playlist: Playlist) => void;
+  onPlaylistJoin?: (id: number) => void;
+}
+
+// TODO remove mock data
+const user = {
+  name: "John Doe",
+  email: "john@example.com",
+  avatar: "/avatars/shadcn.jpg",
 };
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const Logo = data.company.logo;
+const application = {
+  name: "My Hitster",
+  logo: AudioWaveform,
+};
+
+export function AppSidebar({
+  playlists = [],
+  currentPlaylistId,
+  onPlaylistCreate,
+  onPlaylistJoin,
+  ...props
+}: AppSidebarProps) {
+  const Logo = application.logo;
   const { state } = useSidebar();
+  const router = useRouter();
+
+  const [localPlaylists, setLocalPlaylists] =
+    React.useState<Playlist[]>(playlists);
+  const [isCreating, setIsCreating] = React.useState(false);
+  const [isJoining, setIsJoining] = React.useState(false);
+  const [joinExpanded, setJoinExpanded] = React.useState(false);
+  const [joinId, setJoinId] = React.useState("");
+  const [joinError, setJoinError] = React.useState("");
+  const joinInputRef = React.useRef<HTMLInputElement>(null);
+
+  React.useEffect(() => {
+    setLocalPlaylists(playlists);
+  }, [playlists]);
+
+  React.useEffect(() => {
+    if (joinExpanded) {
+      setTimeout(() => joinInputRef.current?.focus(), 50);
+    } else {
+      setJoinId("");
+      setJoinError("");
+    }
+  }, [joinExpanded]);
+
+  const handleAddPlaylist = async () => {
+    if (isCreating) return;
+    setIsCreating(true);
+    try {
+      // TODO replace with orval generated
+      const newPlaylist: Playlist = {
+        id: Date.now(),
+        name: "New Playlist",
+        songCount: 0,
+      };
+      setLocalPlaylists((prev) => [...prev, newPlaylist]);
+      onPlaylistCreate?.(newPlaylist);
+      router.push(`/playlists/${newPlaylist.id}`);
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  const handleJoinPlaylist = async () => {
+    const id = parseInt(joinId);
+    if (!joinId.trim() || isNaN(id)) {
+      setJoinError("Enter a valid playlist ID.");
+      joinInputRef.current?.focus();
+      return;
+    }
+
+    if (localPlaylists.some((p) => p.id === id)) {
+      setJoinError("You're already in this playlist.");
+      return;
+    }
+
+    setIsJoining(true);
+    setJoinError("");
+
+    try {
+      // TODO replace with orval generated
+      const joinedPlaylist: Playlist = {
+        id,
+        name: `Playlist ${id}`,
+        songCount: 0,
+      };
+      setLocalPlaylists((prev) => [...prev, joinedPlaylist]);
+      onPlaylistJoin?.(id);
+      setJoinExpanded(false);
+      router.push(`/playlists/${id}`);
+    } catch {
+      setJoinError("Playlist not found.");
+    } finally {
+      setIsJoining(false);
+    }
+  };
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -59,15 +139,95 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <div className="flex items-center gap-2 px-2 py-1.5">
           <Logo className="h-5 w-5" />
           {state !== "collapsed" && (
-            <span className="font-semibold">{data.company.name}</span>
+            <span className="font-semibold">{application.name}</span>
           )}
         </div>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <SidebarGroup>
+          <SidebarGroupLabel>Playlists</SidebarGroupLabel>
+          <SidebarMenu>
+            {localPlaylists.map((playlist) => (
+              <SidebarMenuItem key={playlist.id}>
+                <SidebarMenuButton
+                  asChild
+                  isActive={currentPlaylistId === playlist.id}
+                  tooltip={playlist.name}
+                >
+                  <Link href={`/playlists/${playlist.id}`}>
+                    <Music className="size-4" />
+                    <span>{playlist.name}</span>
+                    {state !== "collapsed" && (
+                      <span className="ml-auto text-xs text-muted-foreground">
+                        {playlist.songCount}
+                      </span>
+                    )}
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                tooltip="Add Playlist"
+                onClick={handleAddPlaylist}
+                disabled={isCreating}
+                className="cursor-pointer text-muted-foreground hover:text-foreground"
+              >
+                <Plus className="size-4" />
+                {state !== "collapsed" && (
+                  <span>{isCreating ? "Creating..." : "Add Playlist"}</span>
+                )}
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                tooltip="Join Playlist"
+                onClick={() => setJoinExpanded((prev) => !prev)}
+                className="cursor-pointer text-muted-foreground hover:text-foreground"
+              >
+                <LogIn className="size-4" />
+                {state !== "collapsed" && <span>Join Playlist</span>}
+              </SidebarMenuButton>
+
+              {joinExpanded && state !== "collapsed" && (
+                <div className="mt-1 px-2 flex flex-col gap-1.5 animate-in fade-in slide-in-from-top-1 duration-150">
+                  <div className="flex gap-1.5">
+                    <Input
+                      ref={joinInputRef}
+                      placeholder="Playlist ID"
+                      value={joinId}
+                      onChange={(e) => {
+                        setJoinId(e.target.value);
+                        setJoinError("");
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") handleJoinPlaylist();
+                        if (e.key === "Escape") setJoinExpanded(false);
+                      }}
+                      className="h-7 text-xs"
+                    />
+                    <Button
+                      size="sm"
+                      className="h-7 px-2 text-xs shrink-0"
+                      onClick={handleJoinPlaylist}
+                      disabled={isJoining}
+                    >
+                      {isJoining ? "..." : "Join"}
+                    </Button>
+                  </div>
+                  {joinError && (
+                    <p className="text-xs text-destructive px-1">{joinError}</p>
+                  )}
+                </div>
+              )}
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={user} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

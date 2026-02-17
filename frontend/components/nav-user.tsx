@@ -1,14 +1,20 @@
 "use client";
 
+import * as React from "react";
 import {
-  IconCreditCard,
   IconDotsVertical,
   IconLogout,
-  IconNotification,
   IconUserCircle,
+  IconMoon,
+  IconSun,
 } from "@tabler/icons-react";
+import { useTheme } from "next-themes";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/shadcn/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,13 +23,13 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/shadcn/dropdown-menu";
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/components/ui/sidebar";
+} from "@/components/shadcn/sidebar";
 
 export function NavUser({
   user,
@@ -34,7 +40,13 @@ export function NavUser({
     avatar: string;
   };
 }) {
+  const [mounted, setMounted] = React.useState(false);
   const { isMobile } = useSidebar();
+  const { theme, setTheme } = useTheme();
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <SidebarMenu>
@@ -43,7 +55,7 @@ export function NavUser({
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              className="cursor-pointer data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg grayscale">
                 <AvatarImage src={user.avatar} alt={user.name} />
@@ -80,13 +92,29 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              >
+                {mounted ? (
+                  <>
+                    {theme === "dark" ? <IconSun /> : <IconMoon />}
+                    <span>{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
+                  </>
+                ) : (
+                  <>
+                    <div className="size-4 animate-pulse rounded-full bg-muted" />
+                    <span>Loading...</span>
+                  </>
+                )}
+              </DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer">
                 <IconUserCircle />
                 Account
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem className="cursor-pointer">
               <IconLogout />
               Log out
             </DropdownMenuItem>

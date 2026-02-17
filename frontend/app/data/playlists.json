@@ -1,0 +1,27 @@
+[
+  {
+    "id": 1,
+    "name": "Rock Classics",
+    "songCount": 5,
+    "users": [
+      { "id": 1, "name": "John Doe" },
+      { "id": 2, "name": "Jane Smith" },
+      { "id": 3, "name": "Bob Wilson" }
+    ]
+  },
+  {
+    "id": 2,
+    "name": "90s Hits",
+    "songCount": 3,
+    "users": [
+      { "id": 1, "name": "John Doe" },
+      { "id": 2, "name": "Jane Smith" }
+    ]
+  },
+  {
+    "id": 3,
+    "name": "Chill Vibes",
+    "songCount": 8,
+    "users": [{ "id": 1, "name": "John Doe" }]
+  }
+]
