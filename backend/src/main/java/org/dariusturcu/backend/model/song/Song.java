@@ -15,15 +15,24 @@ public class Song {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String artist;
+
     private String title;
+
     private int releaseYear;
+
     private String youtubeId;
+
     private String gradientColor1;
+
     private String gradientColor2;
 
     @Enumerated(EnumType.STRING)
-    private Flag flag;
+    private SongTag songTag;
+
+    @Enumerated(EnumType.STRING)
+    private Country country;
 
     @ManyToOne
     @JoinColumn(name = "playlist_id", nullable = false)

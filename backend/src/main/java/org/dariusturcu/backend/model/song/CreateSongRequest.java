@@ -18,5 +18,10 @@ public record CreateSongRequest(
         String gradientColor1,
 
         @NotBlank(message = "Both gradient colors are required")
-        String gradientColor2) {
+        String gradientColor2,
+
+        SongTag songTag,
+
+        Country country
+) {
 }

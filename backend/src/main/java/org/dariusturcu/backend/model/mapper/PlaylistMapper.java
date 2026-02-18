@@ -46,6 +46,9 @@ public class PlaylistMapper {
         if (request.name() != null) {
             playlist.setName(request.name());
         }
+        if (request.color() != null) {
+            playlist.setColor(request.color());
+        }
         return playlist;
     }
 }

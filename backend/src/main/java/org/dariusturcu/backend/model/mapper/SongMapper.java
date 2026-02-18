@@ -1,9 +1,6 @@
 package org.dariusturcu.backend.model.mapper;
 
-import org.dariusturcu.backend.model.song.CreateSongRequest;
-import org.dariusturcu.backend.model.song.Song;
-import org.dariusturcu.backend.model.song.SongDTO;
-import org.dariusturcu.backend.model.song.UpdateSongRequest;
+import org.dariusturcu.backend.model.song.*;
 
 import org.dariusturcu.backend.model.user.UserSummaryDTO;
 import org.springframework.stereotype.Component;
@@ -19,11 +16,12 @@ public class SongMapper {
                 song.getYoutubeId(),
                 song.getGradientColor1(),
                 song.getGradientColor2(),
+                song.getSongTag() != null ? song.getSongTag() : SongTag.NONE,
+                song.getCountry() != null ? song.getCountry() : Country.NONE,
                 new UserSummaryDTO(
                         song.getAddedBy().getId(),
                         song.getAddedBy().getUsername()
-                ),
-                song.getFlag()
+                )
         );
     }
 
@@ -35,6 +33,9 @@ public class SongMapper {
         newSong.setYoutubeId(request.youtubeId());
         newSong.setGradientColor1(request.gradientColor1());
         newSong.setGradientColor2(request.gradientColor2());
+        newSong.setSongTag(request.songTag() != null ? request.songTag() : SongTag.NONE);
+        newSong.setCountry(request.country() != null ? request.country() : Country.NONE);
+
         return newSong;
     }
 
@@ -57,8 +58,11 @@ public class SongMapper {
         if (request.gradientColor2() != null) {
             song.setGradientColor2(request.gradientColor2());
         }
-        if (request.flag() != null) {
-            song.setFlag(request.flag());
+        if (request.songTag() != null) {
+            song.setSongTag(request.songTag());
+        }
+        if (request.country() != null) {
+            song.setCountry(request.country());
         }
         return song;
     }

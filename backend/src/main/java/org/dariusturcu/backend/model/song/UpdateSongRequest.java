@@ -7,6 +7,7 @@ public record UpdateSongRequest(
         String youtubeId,
         String gradientColor1,
         String gradientColor2,
-        Flag flag
+        SongTag songTag,
+        Country country
 ) {
 }

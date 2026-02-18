@@ -10,7 +10,8 @@ public record SongDTO(
         String youtubeId,
         String gradientColor1,
         String gradientColor2,
-        UserSummaryDTO addedBy,
-        Flag flag
+        SongTag songTag,
+        Country country,
+        UserSummaryDTO addedBy
 ) {
 }

@@ -1,7 +1,8 @@
 package org.dariusturcu.backend.model.song;
 
-public enum Flag {
+public enum SongTag {
     NONE,
+    PLAYLIST,
     SPECIAL,
     ANIME
 }

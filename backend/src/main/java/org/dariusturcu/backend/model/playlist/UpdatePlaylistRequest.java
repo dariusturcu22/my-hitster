@@ -1,5 +1,7 @@
 package org.dariusturcu.backend.model.playlist;
 
 public record UpdatePlaylistRequest(
-        String name) {
+        String name,
+        String color
+) {
 }
