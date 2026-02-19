@@ -10,7 +10,7 @@ import org.springframework.security.oauth2.client.web.AuthorizationRequestReposi
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
+import java.io.*;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Optional;
@@ -77,20 +77,21 @@ public class HttpCookieOAuth2AuthorizationRequestRepository
     }
 
     private String serialize(OAuth2AuthorizationRequest request) {
-        try {
-            byte[] bytes = objectMapper.writeValueAsBytes(request);
-            return Base64.getUrlEncoder().encodeToString(bytes);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+             ObjectOutputStream oos = new ObjectOutputStream(baos)) {
+            oos.writeObject(request);
+            return Base64.getUrlEncoder().encodeToString(baos.toByteArray());
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to serialize OAuth2AuthorizationRequest", e);
         }
     }
 
     private OAuth2AuthorizationRequest deserialize(String value) {
-        try {
-            byte[] bytes = Base64.getUrlDecoder().decode(value);
-            return objectMapper.readValue(bytes, OAuth2AuthorizationRequest.class);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        try (ByteArrayInputStream bais = new ByteArrayInputStream(Base64.getUrlDecoder().decode(value));
+             ObjectInputStream ois = new ObjectInputStream(bais)) {
+            return (OAuth2AuthorizationRequest) ois.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            throw new RuntimeException("Failed to deserialize OAuth2AuthorizationRequest", e);
         }
     }
 }

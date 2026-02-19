@@ -8,13 +8,12 @@ export default function OAuth2RedirectHandler() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    const token = searchParams.get("token");
+    const error = searchParams.get("error");
 
-    if (token) {
-      localStorage.setItem("token", token);
-      router.push("/playlists");
+    if (error) {
+      router.push("/login?error=" + error);
     } else {
-      router.push("/login?error=no_token");
+      router.push("/playlists");
     }
   }, [router, searchParams]);
 

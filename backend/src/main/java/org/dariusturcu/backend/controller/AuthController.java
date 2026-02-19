@@ -82,7 +82,12 @@ public class AuthController {
             HttpServletResponse response
     ) {
         cookieUtil.extractFromCookies(request, "refresh_token")
-                .ifPresent(authService::revokeRefreshToken);
+                .ifPresent(token -> {
+                    try {
+                        authService.revokeRefreshToken(token);
+                    } catch (Exception _) {
+                    }
+                });
 
         response.addHeader(
                 HttpHeaders.SET_COOKIE,
@@ -99,13 +104,15 @@ public class AuthController {
     }
 
     private void setTokenCookies(HttpServletResponse response, AuthResult result) {
+        System.out.println("ACCESS TOKEN: " + result.accessToken());
+        System.out.println("REFRESH TOKEN: " + result.refreshToken());
         response.addHeader(HttpHeaders.SET_COOKIE,
                 cookieUtil.createAccessTokenCookie(
                         result.accessToken(),
                         jwtUtil.getExpirationSeconds()
                 ).toString());
         response.addHeader(HttpHeaders.SET_COOKIE,
-                cookieUtil.createAccessTokenCookie(
+                cookieUtil.createRefreshTokenCookie(
                         result.refreshToken(),
                         jwtUtil.getRefreshExpirationSeconds()
                 ).toString());

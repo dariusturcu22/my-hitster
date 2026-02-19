@@ -36,13 +36,6 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   onPlaylistJoin?: (id: number) => void;
 }
 
-// TODO remove mock data
-const user = {
-  name: "John Doe",
-  email: "john@example.com",
-  avatar: "/avatars/shadcn.jpg",
-};
-
 const application = {
   name: "My Hitster",
   logo: AudioWaveform,
@@ -227,7 +220,7 @@ export function AppSidebar({
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={user} />
+        <NavUser />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

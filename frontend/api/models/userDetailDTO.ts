@@ -10,6 +10,7 @@ export interface UserDetailDTO {
   id?: number;
   username?: string;
   email?: string;
+  imageUrl?: string;
   provider?: string;
   playlists?: PlaylistSummaryDTO[];
 }

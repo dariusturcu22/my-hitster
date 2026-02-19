@@ -31,7 +31,7 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(secret.getBytes());
     }
 
-    public String extractUsername(String token) {
+    public String extractEmail(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
@@ -72,6 +72,7 @@ public class JwtUtil {
             claims.put("userId", user.getId());
             claims.put("email", user.getEmail());
             claims.put("role", user.getRole());
+            return createToken(claims, user.getEmail());
         }
 
         return createToken(claims, userDetails.getUsername());
@@ -82,7 +83,7 @@ public class JwtUtil {
         claims.put("userId", user.getId());
         claims.put("email", user.getEmail());
         claims.put("role", user.getRole());
-        return createToken(claims, user.getUsername());
+        return createToken(claims, user.getEmail());
     }
 
     private String createToken(Map<String, Object> claims, String subject) {
@@ -96,8 +97,11 @@ public class JwtUtil {
     }
 
     public Boolean validateToken(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        final String email = extractEmail(token);
+        if (userDetails instanceof UserPrincipal principal) {
+            return email.equals(principal.getUser().getEmail()) && !isTokenExpired(token);
+        }
+        return (email.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 
     public String generateRefreshToken() {

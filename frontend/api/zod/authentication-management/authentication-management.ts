@@ -33,7 +33,7 @@ export const registerBody = zod.object({
 
 
 export const loginBody = zod.object({
-  "usernameOrEmail": zod.string().min(1),
+  "email": zod.string().min(1),
   "password": zod.string().min(1)
 })
 

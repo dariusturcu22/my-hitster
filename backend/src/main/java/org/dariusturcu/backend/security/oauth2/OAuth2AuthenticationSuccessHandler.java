@@ -60,7 +60,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         );
         response.addHeader(
                 HttpHeaders.SET_COOKIE,
-                cookieUtil.createAccessTokenCookie(
+                cookieUtil.createRefreshTokenCookie(
                         refreshToken,
                         jwtUtil.getRefreshExpirationSeconds()
                 ).toString()

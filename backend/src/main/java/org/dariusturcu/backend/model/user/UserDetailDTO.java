@@ -8,6 +8,7 @@ public record UserDetailDTO(
         Long id,
         String username,
         String email,
+        String imageUrl,
         String provider,
         List<PlaylistSummaryDTO> playlists
 ) {

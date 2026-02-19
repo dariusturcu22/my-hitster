@@ -7,7 +7,7 @@
 
 export interface LoginRequest {
   /** @minLength 1 */
-  usernameOrEmail: string;
+  email: string;
   /** @minLength 1 */
   password: string;
 }

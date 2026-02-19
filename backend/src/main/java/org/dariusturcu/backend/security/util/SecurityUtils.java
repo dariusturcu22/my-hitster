@@ -2,9 +2,11 @@ package org.dariusturcu.backend.security.util;
 
 import org.dariusturcu.backend.model.user.User;
 import org.dariusturcu.backend.security.UserPrincipal;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 
 @Component
 public class SecurityUtils {
@@ -12,7 +14,7 @@ public class SecurityUtils {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !authentication.isAuthenticated()) {
-            throw new RuntimeException("No authentication user found");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "No authentication user found");
         }
 
         Object principal = authentication.getPrincipal();

@@ -56,9 +56,8 @@ public class SecurityConfig {
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                         .csrfTokenRequestHandler(csrfHandler)
                         .ignoringRequestMatchers(
-                                "/auth/login",
-                                "/auth/register",
-                                "/auth/refresh",
+                                "/auth/**",
+                                "/error",
                                 "/oauth2/**",
                                 "/login/oauth2/**"
                         )
@@ -73,7 +72,8 @@ public class SecurityConfig {
                                 "/swagger-ui.html",
                                 "/v3/api-docs/**",
                                 "/v3/api-docs",
-                                "/api/enums/**"
+                                "/api/enums/**",
+                                "/error"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

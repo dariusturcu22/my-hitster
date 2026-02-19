@@ -22,6 +22,7 @@ public class UserMapper {
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),
+                user.getImageUrl(),
                 user.getAuthProvider().name(),
                 user.getPlaylists().stream()
                         .map(playlistMapper::toSummaryDTO)

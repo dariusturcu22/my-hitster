@@ -49,11 +49,11 @@ public class AuthService {
 
         User savedUser = userRepository.save(user);
 
-        String token = jwtUtil.generateToken(savedUser);
+        String accessToken = jwtUtil.generateToken(savedUser);
         String refreshToken = createAndSaveRefreshToken(savedUser);
 
         return new AuthResult(
-                token,
+                accessToken,
                 refreshToken,
                 savedUser.getId(),
                 savedUser.getUsername(),
@@ -64,20 +64,20 @@ public class AuthService {
     public AuthResult login(LoginRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        request.usernameOrEmail(),
+                        request.email(),
                         request.password()
                 )
         );
 
-        User user = userRepository.findUserByUsernameOrEmail(request.usernameOrEmail(), request.usernameOrEmail())
+        User user = userRepository.findUserByEmail(request.email())
                 .orElseThrow(() -> new RuntimeException("User not found"));
         // TODO change to custom exception
 
-        String token = jwtUtil.generateToken(user);
+        String accessToken = jwtUtil.generateToken(user);
         String refreshToken = createAndSaveRefreshToken(user);
 
         return new AuthResult(
-                token,
+                accessToken,
                 refreshToken,
                 user.getId(),
                 user.getUsername(),
@@ -120,7 +120,7 @@ public class AuthService {
         RefreshToken newToken = new RefreshToken();
         newToken.setToken(tokenValue);
         newToken.setUser(user);
-        newToken.setExpiresAt(Instant.now().plusMillis(jwtUtil.getRefreshExpirationSeconds()));
+        newToken.setExpiresAt(Instant.now().plusSeconds(jwtUtil.getRefreshExpirationSeconds()));
         return tokenValue;
     }
 }
