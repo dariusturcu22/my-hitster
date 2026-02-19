@@ -1,30 +1,35 @@
 package org.dariusturcu.backend.service;
 
 import lombok.RequiredArgsConstructor;
-import org.dariusturcu.backend.model.auth.AuthResponse;
+import org.dariusturcu.backend.model.RefreshToken;
+import org.dariusturcu.backend.model.auth.AuthResult;
 import org.dariusturcu.backend.model.auth.LoginRequest;
 import org.dariusturcu.backend.model.auth.RegisterRequest;
 import org.dariusturcu.backend.model.user.AuthProvider;
 import org.dariusturcu.backend.model.user.Role;
 import org.dariusturcu.backend.model.user.User;
+import org.dariusturcu.backend.repository.RefreshTokenRepository;
 import org.dariusturcu.backend.repository.UserRepository;
-import org.dariusturcu.backend.security.JwtUtil;
+import org.dariusturcu.backend.security.util.JwtUtil;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class AuthService {
     private final UserRepository userRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
 
-    public AuthResponse register(RegisterRequest request) {
+    public AuthResult register(RegisterRequest request) {
         if (userRepository.existsUserByUsername(request.username())) {
             throw new RuntimeException("Username already exists");
             // TODO change to custom exception
@@ -45,16 +50,18 @@ public class AuthService {
         User savedUser = userRepository.save(user);
 
         String token = jwtUtil.generateToken(savedUser);
+        String refreshToken = createAndSaveRefreshToken(savedUser);
 
-        return new AuthResponse(
+        return new AuthResult(
                 token,
+                refreshToken,
                 savedUser.getId(),
                 savedUser.getUsername(),
                 savedUser.getEmail()
         );
     }
 
-    public AuthResponse login(LoginRequest request) {
+    public AuthResult login(LoginRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.usernameOrEmail(),
@@ -67,12 +74,53 @@ public class AuthService {
         // TODO change to custom exception
 
         String token = jwtUtil.generateToken(user);
+        String refreshToken = createAndSaveRefreshToken(user);
 
-        return new AuthResponse(
+        return new AuthResult(
                 token,
+                refreshToken,
                 user.getId(),
                 user.getUsername(),
                 user.getEmail()
         );
+    }
+
+    public AuthResult refreshTokens(String refreshToken) {
+        RefreshToken storedToken = refreshTokenRepository.findByToken(refreshToken)
+                .orElseThrow(() -> new RuntimeException("Invalid refresh accessToken"));
+
+        if (storedToken.isExpired()) {
+            refreshTokenRepository.delete(storedToken);
+            throw new RuntimeException("Refresh accessToken expired, please log in again");
+        }
+
+        User user = storedToken.getUser();
+        refreshTokenRepository.delete(storedToken);
+
+        String newAccessToken = jwtUtil.generateToken(user);
+        String newRefreshToken = createAndSaveRefreshToken(user);
+
+        return new AuthResult(
+                newAccessToken,
+                newRefreshToken,
+                user.getId(),
+                user.getUsername(),
+                user.getEmail()
+        );
+    }
+
+    public void revokeRefreshToken(String refreshToken) {
+        refreshTokenRepository.findByToken(refreshToken)
+                .ifPresent(refreshTokenRepository::delete);
+    }
+
+    public String createAndSaveRefreshToken(User user) {
+        refreshTokenRepository.deleteRefreshTokenByUser(user);
+        String tokenValue = jwtUtil.generateRefreshToken();
+        RefreshToken newToken = new RefreshToken();
+        newToken.setToken(tokenValue);
+        newToken.setUser(user);
+        newToken.setExpiresAt(Instant.now().plusMillis(jwtUtil.getRefreshExpirationSeconds()));
+        return tokenValue;
     }
 }

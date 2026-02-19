@@ -1,6 +1,7 @@
-package org.dariusturcu.backend.security;
+package org.dariusturcu.backend.security.util;
 
 import org.dariusturcu.backend.model.user.User;
+import org.dariusturcu.backend.security.UserPrincipal;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;

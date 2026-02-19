@@ -11,16 +11,16 @@ import org.dariusturcu.backend.model.playlist.PlaylistSummaryDTO;
 import org.dariusturcu.backend.model.user.UpdateUserRequest;
 import org.dariusturcu.backend.model.user.User;
 import org.dariusturcu.backend.model.user.UserDetailDTO;
-import org.dariusturcu.backend.model.user.UserSummaryDTO;
 import org.dariusturcu.backend.repository.PlaylistRepository;
 import org.dariusturcu.backend.repository.UserRepository;
 
-import org.dariusturcu.backend.security.SecurityUtils;
+import org.dariusturcu.backend.security.util.SecurityUtils;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -85,6 +85,7 @@ public class UserService {
         Playlist playlist = new Playlist();
         playlist.setName("New playlist");
         playlist.setColor("000000");
+        playlist.setInviteLink(UUID.randomUUID().toString());
         playlist.addUser(user);
 
         Playlist savedPlaylist = playlistRepository.save(playlist);

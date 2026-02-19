@@ -19,4 +19,14 @@ export default defineConfig({
       },
     },
   },
+  myHitsterZod: {
+    input: {
+      target: "http://localhost:8080/v3/api-docs",
+    },
+    output: {
+      mode: "tags-split",
+      target: "api/zod",
+      client: "zod",
+    },
+  },
 });

@@ -5,12 +5,12 @@
  * OpenAPI spec version: v0
  */
 
-export type CreateSongRequestCountry =
-  (typeof CreateSongRequestCountry)[keyof typeof CreateSongRequestCountry];
+export type CreateSongRequestCountry = typeof CreateSongRequestCountry[keyof typeof CreateSongRequestCountry];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const CreateSongRequestCountry = {
-  NONE: "NONE",
-  RO: "RO",
-  GB: "GB",
+  NONE: 'NONE',
+  RO: 'RO',
+  GB: 'GB',
 } as const;

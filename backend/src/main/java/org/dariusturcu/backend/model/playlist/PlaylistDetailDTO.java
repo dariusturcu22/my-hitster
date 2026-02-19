@@ -10,6 +10,7 @@ public record PlaylistDetailDTO(
         Long id,
         String name,
         String color,
+        String inviteLink,
         List<SongDTO> songs,
         Set<UserSummaryDTO> users) {
 }

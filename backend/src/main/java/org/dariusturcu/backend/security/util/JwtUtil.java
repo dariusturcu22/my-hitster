@@ -1,9 +1,10 @@
-package org.dariusturcu.backend.security;
+package org.dariusturcu.backend.security.util;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.dariusturcu.backend.model.user.User;
+import org.dariusturcu.backend.security.UserPrincipal;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -12,6 +13,7 @@ import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 
 @Component
@@ -21,6 +23,9 @@ public class JwtUtil {
 
     @Value("${jwt.expiration}")
     private Long expiration;
+
+    @Value("${jwt.refresh-expiration}")
+    private Long refreshExpiration;
 
     public SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(secret.getBytes());
@@ -93,5 +98,21 @@ public class JwtUtil {
     public Boolean validateToken(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    }
+
+    public String generateRefreshToken() {
+        return UUID.randomUUID().toString();
+    }
+
+    public long getExpirationSeconds() {
+        return expiration / 1000;
+    }
+
+    public long getRefreshExpirationSeconds() {
+        return refreshExpiration / 1000;
+    }
+
+    public long getRefreshExpiration() {
+        return refreshExpiration;
     }
 }

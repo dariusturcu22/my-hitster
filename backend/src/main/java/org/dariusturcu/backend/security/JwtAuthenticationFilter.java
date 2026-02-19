@@ -6,6 +6,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.dariusturcu.backend.security.util.JwtUtil;
+import org.dariusturcu.backend.util.CookieUtil;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,7 +22,19 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
+    private final CookieUtil cookieUtil;
     private final UserDetailsService userDetailsService;
+
+    private String extractToken(HttpServletRequest request) {
+        return cookieUtil.extractFromCookies(request, "access_token")
+                .orElseGet(() -> {
+                    String header = request.getHeader("Authorization");
+                    if (header != null && header.startsWith("Bearer ")) {
+                        return header.substring(7);
+                    }
+                    return null;
+                });
+    }
 
     @Override
     protected void doFilterInternal(
@@ -30,15 +44,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         final String authHeader = request.getHeader("Authorization");
-        final String jwt;
         final String username;
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        String jwt = extractToken(request);
+        if (jwt == null) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        jwt = authHeader.substring(7);
         username = jwtUtil.extractUsername(jwt);
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {

@@ -5,12 +5,12 @@
  * OpenAPI spec version: v0
  */
 
-export type SongDTOCountry =
-  (typeof SongDTOCountry)[keyof typeof SongDTOCountry];
+export type SongDTOCountry = typeof SongDTOCountry[keyof typeof SongDTOCountry];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const SongDTOCountry = {
-  NONE: "NONE",
-  RO: "RO",
-  GB: "GB",
+  NONE: 'NONE',
+  RO: 'RO',
+  GB: 'GB',
 } as const;

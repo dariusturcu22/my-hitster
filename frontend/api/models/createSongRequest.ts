@@ -4,8 +4,8 @@
  * OpenAPI definition
  * OpenAPI spec version: v0
  */
-import type { CreateSongRequestSongTag } from "./createSongRequestSongTag";
-import type { CreateSongRequestCountry } from "./createSongRequestCountry";
+import type { CreateSongRequestSongTag } from './createSongRequestSongTag';
+import type { CreateSongRequestCountry } from './createSongRequestCountry';
 
 export interface CreateSongRequest {
   /** @minLength 1 */

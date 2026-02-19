@@ -25,6 +25,9 @@ public class Playlist {
 
     private String color;
 
+    @Column(nullable = false, updatable = false, unique = true)
+    private String inviteLink;
+
     @OneToMany(mappedBy = "playlist", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Song> songs = new ArrayList<>();
 

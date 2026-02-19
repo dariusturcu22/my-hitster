@@ -4,7 +4,10 @@
  * OpenAPI definition
  * OpenAPI spec version: v0
  */
-import { useMutation, useQuery } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQuery
+} from '@tanstack/react-query';
 import type {
   DataTag,
   DefinedInitialDataOptions,
@@ -17,667 +20,469 @@ import type {
   UseMutationOptions,
   UseMutationResult,
   UseQueryOptions,
-  UseQueryResult,
-} from "@tanstack/react-query";
+  UseQueryResult
+} from '@tanstack/react-query';
 
 import type {
   CreateSongRequest,
   PlaylistDetailDTO,
   SongDTO,
   UpdatePlaylistRequest,
-  UpdateSongRequest,
-} from "../../models";
+  UpdateSongRequest
+} from '../../models';
 
-import { customInstance } from "../../../lib/axios-instance";
+import { customInstance } from '../../../lib/axios-instance';
+
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
+
+
 
 /**
  * @summary Add a new song to the playlist
  */
 export const createSong = (
-  playlistId: number,
-  createSongRequest: CreateSongRequest,
-  options?: SecondParameter<typeof customInstance>,
-  signal?: AbortSignal,
+    playlistId: number,
+    createSongRequest: CreateSongRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
 ) => {
-  return customInstance<SongDTO>(
-    {
-      url: `/api/playlists/${playlistId}/songs`,
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      data: createSongRequest,
-      signal,
+      
+      
+      return customInstance<SongDTO>(
+      {url: `/api/playlists/${playlistId}/songs`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: createSongRequest, signal
     },
-    options,
-  );
-};
+      options);
+    }
+  
 
-export const getCreateSongMutationOptions = <
-  TError = unknown,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof createSong>>,
-    TError,
-    { playlistId: number; data: CreateSongRequest },
-    TContext
-  >;
-  request?: SecondParameter<typeof customInstance>;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof createSong>>,
-  TError,
-  { playlistId: number; data: CreateSongRequest },
-  TContext
-> => {
-  const mutationKey = ["createSong"];
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined };
 
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof createSong>>,
-    { playlistId: number; data: CreateSongRequest }
-  > = (props) => {
-    const { playlistId, data } = props ?? {};
+export const getCreateSongMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createSong>>, TError,{playlistId: number;data: CreateSongRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof createSong>>, TError,{playlistId: number;data: CreateSongRequest}, TContext> => {
 
-    return createSong(playlistId, data, requestOptions);
-  };
+const mutationKey = ['createSong'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
 
-  return { mutationFn, ...mutationOptions };
-};
+      
 
-export type CreateSongMutationResult = NonNullable<
-  Awaited<ReturnType<typeof createSong>>
->;
-export type CreateSongMutationBody = CreateSongRequest;
-export type CreateSongMutationError = unknown;
 
-/**
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createSong>>, {playlistId: number;data: CreateSongRequest}> = (props) => {
+          const {playlistId,data} = props ?? {};
+
+          return  createSong(playlistId,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateSongMutationResult = NonNullable<Awaited<ReturnType<typeof createSong>>>
+    export type CreateSongMutationBody = CreateSongRequest
+    export type CreateSongMutationError = unknown
+
+    /**
  * @summary Add a new song to the playlist
  */
-export const useCreateSong = <TError = unknown, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof createSong>>,
-      TError,
-      { playlistId: number; data: CreateSongRequest },
-      TContext
-    >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof createSong>>,
-  TError,
-  { playlistId: number; data: CreateSongRequest },
-  TContext
-> => {
-  const mutationOptions = getCreateSongMutationOptions(options);
+export const useCreateSong = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createSong>>, TError,{playlistId: number;data: CreateSongRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof createSong>>,
+        TError,
+        {playlistId: number;data: CreateSongRequest},
+        TContext
+      > => {
 
-  return useMutation(mutationOptions, queryClient);
-};
-/**
+      const mutationOptions = getCreateSongMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    /**
  * @summary Get playlist information
  */
 export const getPlaylist = (
-  playlistId: number,
-  options?: SecondParameter<typeof customInstance>,
-  signal?: AbortSignal,
+    playlistId: number,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
 ) => {
-  return customInstance<PlaylistDetailDTO>(
-    { url: `/api/playlists/${playlistId}`, method: "GET", signal },
-    options,
-  );
-};
+      
+      
+      return customInstance<PlaylistDetailDTO>(
+      {url: `/api/playlists/${playlistId}`, method: 'GET', signal
+    },
+      options);
+    }
+  
 
-export const getGetPlaylistQueryKey = (playlistId?: number) => {
-  return [`/api/playlists/${playlistId}`] as const;
-};
 
-export const getGetPlaylistQueryOptions = <
-  TData = Awaited<ReturnType<typeof getPlaylist>>,
-  TError = unknown,
->(
-  playlistId: number,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof getPlaylist>>, TError, TData>
-    >;
-    request?: SecondParameter<typeof customInstance>;
-  },
+
+export const getGetPlaylistQueryKey = (playlistId?: number,) => {
+    return [
+    `/api/playlists/${playlistId}`
+    ] as const;
+    }
+
+    
+export const getGetPlaylistQueryOptions = <TData = Awaited<ReturnType<typeof getPlaylist>>, TError = unknown>(playlistId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlaylist>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
-  const { query: queryOptions, request: requestOptions } = options ?? {};
 
-  const queryKey = queryOptions?.queryKey ?? getGetPlaylistQueryKey(playlistId);
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getPlaylist>>> = ({
-    signal,
-  }) => getPlaylist(playlistId, requestOptions, signal);
+  const queryKey =  queryOptions?.queryKey ?? getGetPlaylistQueryKey(playlistId);
 
-  return {
-    queryKey,
-    queryFn,
-    enabled: !!playlistId,
-    ...queryOptions,
-  } as UseQueryOptions<
-    Awaited<ReturnType<typeof getPlaylist>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-};
+  
 
-export type GetPlaylistQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getPlaylist>>
->;
-export type GetPlaylistQueryError = unknown;
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPlaylist>>> = ({ signal }) => getPlaylist(playlistId, requestOptions, signal);
 
-export function useGetPlaylist<
-  TData = Awaited<ReturnType<typeof getPlaylist>>,
-  TError = unknown,
->(
-  playlistId: number,
-  options: {
-    query: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof getPlaylist>>, TError, TData>
-    > &
-      Pick<
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(playlistId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPlaylist>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetPlaylistQueryResult = NonNullable<Awaited<ReturnType<typeof getPlaylist>>>
+export type GetPlaylistQueryError = unknown
+
+
+export function useGetPlaylist<TData = Awaited<ReturnType<typeof getPlaylist>>, TError = unknown>(
+ playlistId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlaylist>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getPlaylist>>,
           TError,
           Awaited<ReturnType<typeof getPlaylist>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetPlaylist<
-  TData = Awaited<ReturnType<typeof getPlaylist>>,
-  TError = unknown,
->(
-  playlistId: number,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof getPlaylist>>, TError, TData>
-    > &
-      Pick<
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPlaylist<TData = Awaited<ReturnType<typeof getPlaylist>>, TError = unknown>(
+ playlistId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlaylist>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getPlaylist>>,
           TError,
           Awaited<ReturnType<typeof getPlaylist>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetPlaylist<
-  TData = Awaited<ReturnType<typeof getPlaylist>>,
-  TError = unknown,
->(
-  playlistId: number,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof getPlaylist>>, TError, TData>
-    >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPlaylist<TData = Awaited<ReturnType<typeof getPlaylist>>, TError = unknown>(
+ playlistId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlaylist>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get playlist information
  */
 
-export function useGetPlaylist<
-  TData = Awaited<ReturnType<typeof getPlaylist>>,
-  TError = unknown,
->(
-  playlistId: number,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof getPlaylist>>, TError, TData>
-    >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-} {
-  const queryOptions = getGetPlaylistQueryOptions(playlistId, options);
+export function useGetPlaylist<TData = Awaited<ReturnType<typeof getPlaylist>>, TError = unknown>(
+ playlistId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlaylist>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
+  const queryOptions = getGetPlaylistQueryOptions(playlistId,options)
 
-  query.queryKey = queryOptions.queryKey;
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
 
   return query;
 }
+
+
+
 
 /**
  * @summary Update playlist information
  */
 export const updatePlaylist = (
-  playlistId: number,
-  updatePlaylistRequest: UpdatePlaylistRequest,
-  options?: SecondParameter<typeof customInstance>,
-) => {
-  return customInstance<PlaylistDetailDTO>(
-    {
-      url: `/api/playlists/${playlistId}`,
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      data: updatePlaylistRequest,
+    playlistId: number,
+    updatePlaylistRequest: UpdatePlaylistRequest,
+ options?: SecondParameter<typeof customInstance>,) => {
+      
+      
+      return customInstance<PlaylistDetailDTO>(
+      {url: `/api/playlists/${playlistId}`, method: 'PATCH',
+      headers: {'Content-Type': 'application/json', },
+      data: updatePlaylistRequest
     },
-    options,
-  );
-};
+      options);
+    }
+  
 
-export const getUpdatePlaylistMutationOptions = <
-  TError = unknown,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof updatePlaylist>>,
-    TError,
-    { playlistId: number; data: UpdatePlaylistRequest },
-    TContext
-  >;
-  request?: SecondParameter<typeof customInstance>;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof updatePlaylist>>,
-  TError,
-  { playlistId: number; data: UpdatePlaylistRequest },
-  TContext
-> => {
-  const mutationKey = ["updatePlaylist"];
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined };
 
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof updatePlaylist>>,
-    { playlistId: number; data: UpdatePlaylistRequest }
-  > = (props) => {
-    const { playlistId, data } = props ?? {};
+export const getUpdatePlaylistMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updatePlaylist>>, TError,{playlistId: number;data: UpdatePlaylistRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof updatePlaylist>>, TError,{playlistId: number;data: UpdatePlaylistRequest}, TContext> => {
 
-    return updatePlaylist(playlistId, data, requestOptions);
-  };
+const mutationKey = ['updatePlaylist'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
 
-  return { mutationFn, ...mutationOptions };
-};
+      
 
-export type UpdatePlaylistMutationResult = NonNullable<
-  Awaited<ReturnType<typeof updatePlaylist>>
->;
-export type UpdatePlaylistMutationBody = UpdatePlaylistRequest;
-export type UpdatePlaylistMutationError = unknown;
 
-/**
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updatePlaylist>>, {playlistId: number;data: UpdatePlaylistRequest}> = (props) => {
+          const {playlistId,data} = props ?? {};
+
+          return  updatePlaylist(playlistId,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdatePlaylistMutationResult = NonNullable<Awaited<ReturnType<typeof updatePlaylist>>>
+    export type UpdatePlaylistMutationBody = UpdatePlaylistRequest
+    export type UpdatePlaylistMutationError = unknown
+
+    /**
  * @summary Update playlist information
  */
-export const useUpdatePlaylist = <TError = unknown, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof updatePlaylist>>,
-      TError,
-      { playlistId: number; data: UpdatePlaylistRequest },
-      TContext
-    >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof updatePlaylist>>,
-  TError,
-  { playlistId: number; data: UpdatePlaylistRequest },
-  TContext
-> => {
-  const mutationOptions = getUpdatePlaylistMutationOptions(options);
+export const useUpdatePlaylist = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updatePlaylist>>, TError,{playlistId: number;data: UpdatePlaylistRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updatePlaylist>>,
+        TError,
+        {playlistId: number;data: UpdatePlaylistRequest},
+        TContext
+      > => {
 
-  return useMutation(mutationOptions, queryClient);
-};
-/**
+      const mutationOptions = getUpdatePlaylistMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    /**
  * @summary Get information about a particular song in the playlist
  */
 export const getSong = (
-  playlistId: number,
-  songId: number,
-  options?: SecondParameter<typeof customInstance>,
-  signal?: AbortSignal,
+    playlistId: number,
+    songId: number,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
 ) => {
-  return customInstance<SongDTO>(
-    {
-      url: `/api/playlists/${playlistId}/songs/${songId}`,
-      method: "GET",
-      signal,
+      
+      
+      return customInstance<SongDTO>(
+      {url: `/api/playlists/${playlistId}/songs/${songId}`, method: 'GET', signal
     },
-    options,
-  );
-};
+      options);
+    }
+  
 
-export const getGetSongQueryKey = (playlistId?: number, songId?: number) => {
-  return [`/api/playlists/${playlistId}/songs/${songId}`] as const;
-};
 
-export const getGetSongQueryOptions = <
-  TData = Awaited<ReturnType<typeof getSong>>,
-  TError = unknown,
->(
-  playlistId: number,
-  songId: number,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof getSong>>, TError, TData>
-    >;
-    request?: SecondParameter<typeof customInstance>;
-  },
+
+export const getGetSongQueryKey = (playlistId?: number,
+    songId?: number,) => {
+    return [
+    `/api/playlists/${playlistId}/songs/${songId}`
+    ] as const;
+    }
+
+    
+export const getGetSongQueryOptions = <TData = Awaited<ReturnType<typeof getSong>>, TError = unknown>(playlistId: number,
+    songId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSong>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
-  const { query: queryOptions, request: requestOptions } = options ?? {};
 
-  const queryKey =
-    queryOptions?.queryKey ?? getGetSongQueryKey(playlistId, songId);
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getSong>>> = ({
-    signal,
-  }) => getSong(playlistId, songId, requestOptions, signal);
+  const queryKey =  queryOptions?.queryKey ?? getGetSongQueryKey(playlistId,songId);
 
-  return {
-    queryKey,
-    queryFn,
-    enabled: !!(playlistId && songId),
-    ...queryOptions,
-  } as UseQueryOptions<Awaited<ReturnType<typeof getSong>>, TError, TData> & {
-    queryKey: DataTag<QueryKey, TData, TError>;
-  };
-};
+  
 
-export type GetSongQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getSong>>
->;
-export type GetSongQueryError = unknown;
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSong>>> = ({ signal }) => getSong(playlistId,songId, requestOptions, signal);
 
-export function useGetSong<
-  TData = Awaited<ReturnType<typeof getSong>>,
-  TError = unknown,
->(
-  playlistId: number,
-  songId: number,
-  options: {
-    query: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof getSong>>, TError, TData>
-    > &
-      Pick<
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(playlistId && songId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSong>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetSongQueryResult = NonNullable<Awaited<ReturnType<typeof getSong>>>
+export type GetSongQueryError = unknown
+
+
+export function useGetSong<TData = Awaited<ReturnType<typeof getSong>>, TError = unknown>(
+ playlistId: number,
+    songId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSong>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getSong>>,
           TError,
           Awaited<ReturnType<typeof getSong>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetSong<
-  TData = Awaited<ReturnType<typeof getSong>>,
-  TError = unknown,
->(
-  playlistId: number,
-  songId: number,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof getSong>>, TError, TData>
-    > &
-      Pick<
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetSong<TData = Awaited<ReturnType<typeof getSong>>, TError = unknown>(
+ playlistId: number,
+    songId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSong>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getSong>>,
           TError,
           Awaited<ReturnType<typeof getSong>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetSong<
-  TData = Awaited<ReturnType<typeof getSong>>,
-  TError = unknown,
->(
-  playlistId: number,
-  songId: number,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof getSong>>, TError, TData>
-    >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetSong<TData = Awaited<ReturnType<typeof getSong>>, TError = unknown>(
+ playlistId: number,
+    songId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSong>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get information about a particular song in the playlist
  */
 
-export function useGetSong<
-  TData = Awaited<ReturnType<typeof getSong>>,
-  TError = unknown,
->(
-  playlistId: number,
-  songId: number,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof getSong>>, TError, TData>
-    >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-} {
-  const queryOptions = getGetSongQueryOptions(playlistId, songId, options);
+export function useGetSong<TData = Awaited<ReturnType<typeof getSong>>, TError = unknown>(
+ playlistId: number,
+    songId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSong>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
+  const queryOptions = getGetSongQueryOptions(playlistId,songId,options)
 
-  query.queryKey = queryOptions.queryKey;
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
 
   return query;
 }
+
+
+
 
 /**
  * @summary Delete song from the playlist
  */
 export const deleteSong = (
-  playlistId: number,
-  songId: number,
-  options?: SecondParameter<typeof customInstance>,
-) => {
-  return customInstance<void>(
-    { url: `/api/playlists/${playlistId}/songs/${songId}`, method: "DELETE" },
-    options,
-  );
-};
+    playlistId: number,
+    songId: number,
+ options?: SecondParameter<typeof customInstance>,) => {
+      
+      
+      return customInstance<void>(
+      {url: `/api/playlists/${playlistId}/songs/${songId}`, method: 'DELETE'
+    },
+      options);
+    }
+  
 
-export const getDeleteSongMutationOptions = <
-  TError = unknown,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof deleteSong>>,
-    TError,
-    { playlistId: number; songId: number },
-    TContext
-  >;
-  request?: SecondParameter<typeof customInstance>;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof deleteSong>>,
-  TError,
-  { playlistId: number; songId: number },
-  TContext
-> => {
-  const mutationKey = ["deleteSong"];
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined };
 
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof deleteSong>>,
-    { playlistId: number; songId: number }
-  > = (props) => {
-    const { playlistId, songId } = props ?? {};
+export const getDeleteSongMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteSong>>, TError,{playlistId: number;songId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteSong>>, TError,{playlistId: number;songId: number}, TContext> => {
 
-    return deleteSong(playlistId, songId, requestOptions);
-  };
+const mutationKey = ['deleteSong'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
 
-  return { mutationFn, ...mutationOptions };
-};
+      
 
-export type DeleteSongMutationResult = NonNullable<
-  Awaited<ReturnType<typeof deleteSong>>
->;
 
-export type DeleteSongMutationError = unknown;
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteSong>>, {playlistId: number;songId: number}> = (props) => {
+          const {playlistId,songId} = props ?? {};
 
-/**
+          return  deleteSong(playlistId,songId,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteSongMutationResult = NonNullable<Awaited<ReturnType<typeof deleteSong>>>
+    
+    export type DeleteSongMutationError = unknown
+
+    /**
  * @summary Delete song from the playlist
  */
-export const useDeleteSong = <TError = unknown, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof deleteSong>>,
-      TError,
-      { playlistId: number; songId: number },
-      TContext
-    >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof deleteSong>>,
-  TError,
-  { playlistId: number; songId: number },
-  TContext
-> => {
-  const mutationOptions = getDeleteSongMutationOptions(options);
+export const useDeleteSong = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteSong>>, TError,{playlistId: number;songId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteSong>>,
+        TError,
+        {playlistId: number;songId: number},
+        TContext
+      > => {
 
-  return useMutation(mutationOptions, queryClient);
-};
-/**
+      const mutationOptions = getDeleteSongMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    /**
  * @summary Edit information about a particular song in the playlist
  */
 export const updateSong = (
-  playlistId: number,
-  songId: number,
-  updateSongRequest: UpdateSongRequest,
-  options?: SecondParameter<typeof customInstance>,
-) => {
-  return customInstance<SongDTO>(
-    {
-      url: `/api/playlists/${playlistId}/songs/${songId}`,
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      data: updateSongRequest,
+    playlistId: number,
+    songId: number,
+    updateSongRequest: UpdateSongRequest,
+ options?: SecondParameter<typeof customInstance>,) => {
+      
+      
+      return customInstance<SongDTO>(
+      {url: `/api/playlists/${playlistId}/songs/${songId}`, method: 'PATCH',
+      headers: {'Content-Type': 'application/json', },
+      data: updateSongRequest
     },
-    options,
-  );
-};
+      options);
+    }
+  
 
-export const getUpdateSongMutationOptions = <
-  TError = unknown,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof updateSong>>,
-    TError,
-    { playlistId: number; songId: number; data: UpdateSongRequest },
-    TContext
-  >;
-  request?: SecondParameter<typeof customInstance>;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof updateSong>>,
-  TError,
-  { playlistId: number; songId: number; data: UpdateSongRequest },
-  TContext
-> => {
-  const mutationKey = ["updateSong"];
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined };
 
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof updateSong>>,
-    { playlistId: number; songId: number; data: UpdateSongRequest }
-  > = (props) => {
-    const { playlistId, songId, data } = props ?? {};
+export const getUpdateSongMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateSong>>, TError,{playlistId: number;songId: number;data: UpdateSongRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateSong>>, TError,{playlistId: number;songId: number;data: UpdateSongRequest}, TContext> => {
 
-    return updateSong(playlistId, songId, data, requestOptions);
-  };
+const mutationKey = ['updateSong'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
 
-  return { mutationFn, ...mutationOptions };
-};
+      
 
-export type UpdateSongMutationResult = NonNullable<
-  Awaited<ReturnType<typeof updateSong>>
->;
-export type UpdateSongMutationBody = UpdateSongRequest;
-export type UpdateSongMutationError = unknown;
 
-/**
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateSong>>, {playlistId: number;songId: number;data: UpdateSongRequest}> = (props) => {
+          const {playlistId,songId,data} = props ?? {};
+
+          return  updateSong(playlistId,songId,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateSongMutationResult = NonNullable<Awaited<ReturnType<typeof updateSong>>>
+    export type UpdateSongMutationBody = UpdateSongRequest
+    export type UpdateSongMutationError = unknown
+
+    /**
  * @summary Edit information about a particular song in the playlist
  */
-export const useUpdateSong = <TError = unknown, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof updateSong>>,
-      TError,
-      { playlistId: number; songId: number; data: UpdateSongRequest },
-      TContext
-    >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof updateSong>>,
-  TError,
-  { playlistId: number; songId: number; data: UpdateSongRequest },
-  TContext
-> => {
-  const mutationOptions = getUpdateSongMutationOptions(options);
+export const useUpdateSong = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateSong>>, TError,{playlistId: number;songId: number;data: UpdateSongRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updateSong>>,
+        TError,
+        {playlistId: number;songId: number;data: UpdateSongRequest},
+        TContext
+      > => {
 
-  return useMutation(mutationOptions, queryClient);
-};
+      const mutationOptions = getUpdateSongMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    

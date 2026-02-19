@@ -5,13 +5,13 @@
  * OpenAPI spec version: v0
  */
 
-export type GetTags200Item =
-  (typeof GetTags200Item)[keyof typeof GetTags200Item];
+export type GetTags200Item = typeof GetTags200Item[keyof typeof GetTags200Item];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const GetTags200Item = {
-  NONE: "NONE",
-  PLAYLIST: "PLAYLIST",
-  SPECIAL: "SPECIAL",
-  ANIME: "ANIME",
+  NONE: 'NONE',
+  PLAYLIST: 'PLAYLIST',
+  SPECIAL: 'SPECIAL',
+  ANIME: 'ANIME',
 } as const;

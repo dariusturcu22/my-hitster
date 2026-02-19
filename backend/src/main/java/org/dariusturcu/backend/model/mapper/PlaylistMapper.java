@@ -33,6 +33,7 @@ public class PlaylistMapper {
                 playlist.getId(),
                 playlist.getName(),
                 playlist.getColor(),
+                playlist.getInviteLink(),
                 playlist.getSongs().stream()
                         .map(songMapper::toDTO)
                         .toList(),

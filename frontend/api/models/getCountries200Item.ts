@@ -5,12 +5,12 @@
  * OpenAPI spec version: v0
  */
 
-export type GetCountries200Item =
-  (typeof GetCountries200Item)[keyof typeof GetCountries200Item];
+export type GetCountries200Item = typeof GetCountries200Item[keyof typeof GetCountries200Item];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const GetCountries200Item = {
-  NONE: "NONE",
-  RO: "RO",
-  GB: "GB",
+  NONE: 'NONE',
+  RO: 'RO',
+  GB: 'GB',
 } as const;

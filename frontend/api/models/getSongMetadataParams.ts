@@ -6,5 +6,5 @@
  */
 
 export type GetSongMetadataParams = {
-  youtubeUrl: string;
+youtubeUrl: string;
 };

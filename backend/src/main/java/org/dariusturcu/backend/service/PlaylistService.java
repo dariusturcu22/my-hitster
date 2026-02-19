@@ -15,7 +15,7 @@ import org.dariusturcu.backend.model.user.User;
 import org.dariusturcu.backend.repository.PlaylistRepository;
 
 import org.dariusturcu.backend.repository.SongRepository;
-import org.dariusturcu.backend.security.SecurityUtils;
+import org.dariusturcu.backend.security.util.SecurityUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;

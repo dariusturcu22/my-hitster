@@ -4,8 +4,8 @@
  * OpenAPI definition
  * OpenAPI spec version: v0
  */
-import type { UpdateSongRequestSongTag } from "./updateSongRequestSongTag";
-import type { UpdateSongRequestCountry } from "./updateSongRequestCountry";
+import type { UpdateSongRequestSongTag } from './updateSongRequestSongTag';
+import type { UpdateSongRequestCountry } from './updateSongRequestCountry';
 
 export interface UpdateSongRequest {
   artist?: string;

@@ -12,7 +12,7 @@ import org.dariusturcu.backend.exception.ResourceType;
 import org.dariusturcu.backend.model.playlist.Playlist;
 import org.dariusturcu.backend.model.song.Song;
 import org.dariusturcu.backend.repository.PlaylistRepository;
-import org.dariusturcu.backend.security.SecurityUtils;
+import org.dariusturcu.backend.security.util.SecurityUtils;
 import org.dariusturcu.backend.util.CardGenerator;
 import org.dariusturcu.backend.util.QRGenerator;
 import org.springframework.stereotype.Service;
