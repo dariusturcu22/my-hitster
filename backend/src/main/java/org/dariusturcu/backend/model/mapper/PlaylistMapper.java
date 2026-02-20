@@ -7,7 +7,6 @@ import org.dariusturcu.backend.model.playlist.UpdatePlaylistRequest;
 
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
-import lombok.RequiredArgsConstructor;
 
 import java.util.stream.Collectors;
 
@@ -24,7 +23,8 @@ public class PlaylistMapper {
     public PlaylistSummaryDTO toSummaryDTO(Playlist playlist) {
         return new PlaylistSummaryDTO(
                 playlist.getId(),
-                playlist.getName()
+                playlist.getName(),
+                playlist.getSongCount()
         );
     }
 
@@ -33,7 +33,8 @@ public class PlaylistMapper {
                 playlist.getId(),
                 playlist.getName(),
                 playlist.getColor(),
-                playlist.getInviteLink(),
+                playlist.getInviteCode(),
+                playlist.getSongCount(),
                 playlist.getSongs().stream()
                         .map(songMapper::toDTO)
                         .toList(),

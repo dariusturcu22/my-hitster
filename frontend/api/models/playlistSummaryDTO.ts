@@ -6,6 +6,7 @@
  */
 
 export interface PlaylistSummaryDTO {
-  id?: number;
-  name?: string;
+  id: number;
+  name: string;
+  songCount: number;
 }

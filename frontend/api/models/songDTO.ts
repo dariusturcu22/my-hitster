@@ -9,14 +9,14 @@ import type { SongDTOCountry } from './songDTOCountry';
 import type { UserSummaryDTO } from './userSummaryDTO';
 
 export interface SongDTO {
-  id?: number;
-  artist?: string;
-  title?: string;
-  releaseYear?: number;
-  youtubeId?: string;
+  id: number;
+  artist: string;
+  title: string;
+  releaseYear: number;
+  youtubeId: string;
   gradientColor1?: string;
   gradientColor2?: string;
   songTag?: SongDTOSongTag;
   country?: SongDTOCountry;
-  addedBy?: UserSummaryDTO;
+  addedBy: UserSummaryDTO;
 }

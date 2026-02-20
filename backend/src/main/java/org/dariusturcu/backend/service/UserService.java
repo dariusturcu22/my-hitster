@@ -33,8 +33,10 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public UserDetailDTO getCurrentUser() {
-        User user = SecurityUtils.getCurrentUser();
-        user.getPlaylists().size();
+        User contextUser = SecurityUtils.getCurrentUser();
+        User user = userRepository.findById(contextUser.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        user.getPlaylists().forEach(playlist -> playlist.getSongs().size());
         return userMapper.toDetailDTO(user);
     }
 
@@ -85,7 +87,7 @@ public class UserService {
         Playlist playlist = new Playlist();
         playlist.setName("New playlist");
         playlist.setColor("000000");
-        playlist.setInviteLink(UUID.randomUUID().toString());
+        playlist.setInviteCode(UUID.randomUUID().toString());
         playlist.addUser(user);
 
         Playlist savedPlaylist = playlistRepository.save(playlist);
@@ -99,8 +101,9 @@ public class UserService {
     @Transactional(readOnly = true)
     public List<PlaylistSummaryDTO> getUserPlaylists() {
         User user = SecurityUtils.getCurrentUser();
-
-        return user.getPlaylists().stream()
+        List<Playlist> playlists = playlistRepository.findByUsers(user);
+        playlists.forEach(playlist -> playlist.getSongs().size());
+        return playlists.stream()
                 .map(playlistMapper::toSummaryDTO)
                 .toList();
     }
@@ -126,7 +129,9 @@ public class UserService {
     }
 
     public void leavePlaylist(Long playlistId) {
-        User user = SecurityUtils.getCurrentUser();
+        User contextUser = SecurityUtils.getCurrentUser();
+        User user = userRepository.findById(contextUser.getId())
+                .orElseThrow(() -> new ResourceNotFoundException(ResourceType.USER, contextUser.getId()));
 
         Playlist playlist = playlistRepository.findById(playlistId)
                 .orElseThrow(() -> new ResourceNotFoundException(ResourceType.PLAYLIST, playlistId));
@@ -138,6 +143,10 @@ public class UserService {
         }
 
         playlist.removeUser(user);
+
+        if (playlist.getUserCount() == 0) {
+            playlistRepository.delete(playlist);
+        }
 
         userRepository.save(user);
     }

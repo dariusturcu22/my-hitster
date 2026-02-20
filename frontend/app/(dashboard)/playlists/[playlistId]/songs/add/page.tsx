@@ -1,21 +1,22 @@
+"use client";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/shadcn/sidebar";
 import { Button } from "@/components/shadcn/button";
 import { IconArrowLeft } from "@tabler/icons-react";
 import Link from "next/link";
-import React from "react";
+import React, { use } from "react";
 import { AddSongForm } from "./AddSongForm";
+import { useGetUserPlaylists } from "@/api/generated/user-management/user-management";
 
-import playlistsData from "@/app/data/playlists.json";
-
-export default async function AddSongPage({
-  params,
-}: {
+interface PageProps {
   params: Promise<{ playlistId: string }>;
-}) {
-  const { playlistId } = await params;
-  const playlistIdNumber = parseInt(playlistId);
+}
+
+export default function AddSongPage({ params }: PageProps) {
+  const { playlistId: rawId } = use(params);
+  const playlistId = parseInt(rawId);
+  const { data: playlists } = useGetUserPlaylists();
   const backPath = `/playlists/${playlistId}`;
 
   return (
@@ -29,8 +30,8 @@ export default async function AddSongPage({
     >
       <AppSidebar
         variant="inset"
-        playlists={playlistsData}
-        currentPlaylistId={playlistIdNumber}
+        playlists={playlists}
+        currentPlaylistId={playlistId}
       />
       <SidebarInset>
         <SiteHeader title="Add Song" />

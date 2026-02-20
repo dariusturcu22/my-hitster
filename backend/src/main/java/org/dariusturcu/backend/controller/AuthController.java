@@ -104,8 +104,6 @@ public class AuthController {
     }
 
     private void setTokenCookies(HttpServletResponse response, AuthResult result) {
-        System.out.println("ACCESS TOKEN: " + result.accessToken());
-        System.out.println("REFRESH TOKEN: " + result.refreshToken());
         response.addHeader(HttpHeaders.SET_COOKIE,
                 cookieUtil.createAccessTokenCookie(
                         result.accessToken(),

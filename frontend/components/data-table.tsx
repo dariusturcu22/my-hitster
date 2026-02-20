@@ -12,6 +12,7 @@ import {
   IconLink,
   IconDoorExit,
   IconCheck,
+  IconHash,
 } from "@tabler/icons-react";
 import {
   flexRender,
@@ -61,42 +62,28 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/shadcn/alert-dialog";
-
-// TODO replace with orval generated
-export const songSchema = z.object({
-  id: z.number(),
-  title: z.string(),
-  artist: z.string(),
-  releaseYear: z.number(),
-  youtubeId: z.string(),
-  gradientColor1: z.string(),
-  gradientColor2: z.string(),
-  playlistId: z.number(),
-  addedBy: z.object({
-    id: z.number(),
-    name: z.string(),
-    email: z.string(),
-  }),
-});
-
-// TODO replace with orval generated
-type Song = z.infer<typeof songSchema>;
+import { SongDTO } from "@/api/models";
+import { useGetPlaylist } from "@/api/generated/playlist-management/playlist-management";
 
 interface SongsDataTableProps {
-  data: Song[];
+  data: SongDTO[];
   playlistId: number;
+  inviteCode: string;
   onDelete?: (id: number) => void;
   onLeave?: () => void;
   isLoading?: boolean;
 }
 
 export function DataTable({
-  data,
+  data = [],
   playlistId,
+  inviteCode,
   onDelete,
   onLeave,
   isLoading = false,
 }: SongsDataTableProps) {
+  const { data: playlist } = useGetPlaylist(playlistId);
+
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     [],
@@ -105,17 +92,23 @@ export function DataTable({
     pageIndex: 0,
     pageSize: 10,
   });
-  const [copied, setCopied] = React.useState(false);
+  const [copiedLink, setLinkCopied] = React.useState(false);
+  const [copiedCode, setCodeCopied] = React.useState(false);
 
-  // TODO replace with link from backend
   const handleCopyLink = async () => {
-    const inviteLink = `${window.location.origin}/playlists/join/${playlistId}`;
+    const inviteLink = `${window.location.origin}/playlists/join/${inviteCode}`;
     await navigator.clipboard.writeText(inviteLink);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setLinkCopied(true);
+    setTimeout(() => setLinkCopied(false), 2000);
   };
 
-  const columns: ColumnDef<Song>[] = [
+  const handleCopyCode = async () => {
+    await navigator.clipboard.writeText(inviteCode);
+    setCodeCopied(true);
+    setTimeout(() => setCodeCopied(false), 2000);
+  };
+
+  const columns: ColumnDef<SongDTO>[] = [
     {
       id: "select",
       header: ({ table }) => (
@@ -169,7 +162,9 @@ export function DataTable({
     {
       accessorKey: "addedBy",
       header: "Added By",
-      cell: ({ row }) => <div>{row.original.addedBy.name}</div>,
+      cell: ({ row }) => (
+        <div>{row.original.addedBy?.username ?? "Unknown"}</div>
+      ),
     },
     {
       id: "actions",
@@ -249,7 +244,7 @@ export function DataTable({
                   className="size-8"
                   onClick={handleCopyLink}
                 >
-                  {copied ? (
+                  {copiedLink ? (
                     <IconCheck className="size-4 text-green-500" />
                   ) : (
                     <IconLink className="size-4" />
@@ -258,7 +253,28 @@ export function DataTable({
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                {copied ? "Copied!" : "Copy invite link"}
+                {copiedLink ? "Copied!" : "Copy invite link"}
+              </TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="size-8"
+                  onClick={handleCopyCode}
+                >
+                  {copiedCode ? (
+                    <IconCheck className="size-4 text-green-500" />
+                  ) : (
+                    <IconHash className="size-4" />
+                  )}
+                  <span className="sr-only">Copy invite code</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {copiedCode ? "Copied!" : "Copy invite code"}
               </TooltipContent>
             </Tooltip>
 

@@ -22,18 +22,18 @@ import {
 import { Input } from "@/components/shadcn/input";
 import { Button } from "@/components/shadcn/button";
 
-// TODO replace with orval generated
-interface Playlist {
-  id: number;
-  name: string;
-  songCount: number;
-}
+import { PlaylistSummaryDTO } from "@/api/models";
+
+import {
+  useCreatePlaylist,
+  useJoinPlaylist,
+  getGetUserPlaylistsQueryKey,
+} from "@/api/generated/user-management/user-management";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
-  playlists?: Playlist[];
+  playlists?: PlaylistSummaryDTO[];
   currentPlaylistId?: number;
-  onPlaylistCreate?: (playlist: Playlist) => void;
-  onPlaylistJoin?: (id: number) => void;
 }
 
 const application = {
@@ -44,86 +44,57 @@ const application = {
 export function AppSidebar({
   playlists = [],
   currentPlaylistId,
-  onPlaylistCreate,
-  onPlaylistJoin,
   ...props
 }: AppSidebarProps) {
   const Logo = application.logo;
   const { state } = useSidebar();
   const router = useRouter();
+  const queryClient = useQueryClient();
 
-  const [localPlaylists, setLocalPlaylists] =
-    React.useState<Playlist[]>(playlists);
-  const [isCreating, setIsCreating] = React.useState(false);
-  const [isJoining, setIsJoining] = React.useState(false);
+  const { mutate: createPlaylist, isPending: isCreating } = useCreatePlaylist();
+  const { mutate: joinPlaylist, isPending: isJoining } = useJoinPlaylist();
+
   const [joinExpanded, setJoinExpanded] = React.useState(false);
   const [joinId, setJoinId] = React.useState("");
   const [joinError, setJoinError] = React.useState("");
   const joinInputRef = React.useRef<HTMLInputElement>(null);
 
-  React.useEffect(() => {
-    setLocalPlaylists(playlists);
-  }, [playlists]);
-
-  React.useEffect(() => {
-    if (joinExpanded) {
-      setTimeout(() => joinInputRef.current?.focus(), 50);
-    } else {
-      setJoinId("");
-      setJoinError("");
-    }
-  }, [joinExpanded]);
-
-  const handleAddPlaylist = async () => {
-    if (isCreating) return;
-    setIsCreating(true);
-    try {
-      // TODO replace with orval generated
-      const newPlaylist: Playlist = {
-        id: Date.now(),
-        name: "New Playlist",
-        songCount: 0,
-      };
-      setLocalPlaylists((prev) => [...prev, newPlaylist]);
-      onPlaylistCreate?.(newPlaylist);
-      router.push(`/playlists/${newPlaylist.id}`);
-    } finally {
-      setIsCreating(false);
-    }
+  const handleAddPlaylist = () => {
+    createPlaylist(undefined, {
+      onSuccess: (newPlaylist) => {
+        queryClient.invalidateQueries({
+          queryKey: getGetUserPlaylistsQueryKey(),
+        });
+        router.push(`/playlists/${newPlaylist.id}`);
+      },
+      onError: () => {
+        setJoinError("Failed to create playlist");
+      },
+    });
   };
 
-  const handleJoinPlaylist = async () => {
+  const handleJoinPlaylist = () => {
     const id = parseInt(joinId);
-    if (!joinId.trim() || isNaN(id)) {
-      setJoinError("Enter a valid playlist ID.");
-      joinInputRef.current?.focus();
+    if (!joinId.trim || isNaN(id)) {
+      setJoinError("Enter a valid playlist join link");
       return;
     }
 
-    if (localPlaylists.some((p) => p.id === id)) {
-      setJoinError("You're already in this playlist.");
-      return;
-    }
-
-    setIsJoining(true);
-    setJoinError("");
-
-    try {
-      // TODO replace with orval generated
-      const joinedPlaylist: Playlist = {
-        id,
-        name: `Playlist ${id}`,
-        songCount: 0,
-      };
-      setLocalPlaylists((prev) => [...prev, joinedPlaylist]);
-      onPlaylistJoin?.(id);
-      setJoinExpanded(false);
-      router.push(`/playlists/${id}`);
-    } catch {
-      setJoinError("Playlist not found.");
-    } finally {
-      setIsJoining(false);
-    }
+    joinPlaylist(
+      { playlistId: id },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({
+            queryKey: getGetUserPlaylistsQueryKey(),
+          });
+          setJoinExpanded(false);
+          router.push(`/playlists/${id}`);
+        },
+        onError: (error: any) => {
+          setJoinError(error?.response?.data?.message || "Playlist not found");
+        },
+      },
+    );
   };
 
   return (
@@ -140,7 +111,7 @@ export function AppSidebar({
         <SidebarGroup>
           <SidebarGroupLabel>Playlists</SidebarGroupLabel>
           <SidebarMenu>
-            {localPlaylists.map((playlist) => (
+            {playlists.map((playlist) => (
               <SidebarMenuItem key={playlist.id}>
                 <SidebarMenuButton
                   asChild

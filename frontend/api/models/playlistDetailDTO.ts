@@ -8,10 +8,11 @@ import type { SongDTO } from './songDTO';
 import type { UserSummaryDTO } from './userSummaryDTO';
 
 export interface PlaylistDetailDTO {
-  id?: number;
-  name?: string;
-  color?: string;
-  inviteLink?: string;
+  id: number;
+  name: string;
+  color: string;
+  inviteCode: string;
+  songCount: number;
   songs?: SongDTO[];
-  users?: UserSummaryDTO[];
+  users: UserSummaryDTO[];
 }

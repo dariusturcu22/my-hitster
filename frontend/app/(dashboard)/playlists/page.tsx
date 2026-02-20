@@ -1,19 +1,26 @@
+"use client";
+
 import { AppSidebar } from "@/components/app-sidebar";
 import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/shadcn/sidebar";
 import React from "react";
 
-import playlistsData from "@/app/data/playlists.json";
+import { useGetUserPlaylists } from "@/api/generated/user-management/user-management";
 
-export default async function PlaylistPage({
-  params,
-}: {
-  params: Promise<{ playlistId: string }>;
-}) {
-  const { playlistId } = await params;
-  const id = parseInt(playlistId);
+export default function PlaylistPage() {
+  const { data: playlists, isLoading, isError, error } = useGetUserPlaylists();
 
-  const currentPlaylist = playlistsData.find((playlist) => playlist.id === id);
+  if (isLoading) {
+    return <div>Loading playlists...</div>;
+  }
+
+  if (isError) {
+    return <div>Failed to load playlists</div>;
+  }
+
+  if (!playlists) {
+    return <div>You are not a part of any playlist</div>;
+  }
 
   return (
     <SidebarProvider
@@ -26,11 +33,11 @@ export default async function PlaylistPage({
     >
       <AppSidebar
         variant="inset"
-        playlists={playlistsData}
-        currentPlaylistId={id}
+        playlists={playlists}
+        currentPlaylistId={undefined}
       />
       <SidebarInset>
-        <SiteHeader title={currentPlaylist?.name || "Playlist"} />
+        <SiteHeader title="-- No playlist selected --" />
       </SidebarInset>
     </SidebarProvider>
   );

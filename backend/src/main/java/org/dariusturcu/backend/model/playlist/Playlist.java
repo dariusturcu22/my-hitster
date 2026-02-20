@@ -26,7 +26,7 @@ public class Playlist {
     private String color;
 
     @Column(nullable = false, updatable = false, unique = true)
-    private String inviteLink;
+    private String inviteCode;
 
     @OneToMany(mappedBy = "playlist", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Song> songs = new ArrayList<>();
@@ -50,5 +50,13 @@ public class Playlist {
 
     public void removeUser(User user) {
         users.remove(user);
+    }
+
+    public int getUserCount() {
+        return users.size();
+    }
+
+    public int getSongCount() {
+        return songs.size();
     }
 }
