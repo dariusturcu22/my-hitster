@@ -101,21 +101,21 @@ public class UserService {
     @Transactional(readOnly = true)
     public List<PlaylistSummaryDTO> getUserPlaylists() {
         User user = SecurityUtils.getCurrentUser();
-        List<Playlist> playlists = playlistRepository.findByUsers(user);
+        List<Playlist> playlists = playlistRepository.findPlaylistsByUsers(user);
         playlists.forEach(playlist -> playlist.getSongs().size());
         return playlists.stream()
                 .map(playlistMapper::toSummaryDTO)
                 .toList();
     }
 
-    public PlaylistSummaryDTO joinPlaylist(Long playlistId) {
+    public PlaylistSummaryDTO joinPlaylist(String playlistInviteCode) {
         User user = SecurityUtils.getCurrentUser();
 
-        Playlist playlist = playlistRepository.findById(playlistId)
-                .orElseThrow(() -> new ResourceNotFoundException(ResourceType.PLAYLIST, playlistId));
+        Playlist playlist = playlistRepository.findPlaylistByInviteCode(playlistInviteCode)
+                .orElseThrow(() -> new ResourceNotFoundException("Invite code {" + playlistInviteCode + "} not found"));
 
         boolean alreadyMember = user.getPlaylists().stream()
-                .anyMatch(p -> p.getId().equals(playlistId));
+                .anyMatch(p -> p.getId().equals(playlist.getId()));
 
         if (alreadyMember) {
             throw new RuntimeException("User is already a member of this playlist");

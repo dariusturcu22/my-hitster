@@ -195,13 +195,13 @@ export const useCreatePlaylist = <TError = unknown,
  * @summary Join an existing playlist
  */
 export const joinPlaylist = (
-    playlistId: number,
+    playlistInviteCode: string,
  options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
 ) => {
       
       
       return customInstance<PlaylistSummaryDTO>(
-      {url: `/api/users/me/playlists/${playlistId}`, method: 'POST', signal
+      {url: `/api/users/me/playlists/${playlistInviteCode}`, method: 'POST', signal
     },
       options);
     }
@@ -209,8 +209,8 @@ export const joinPlaylist = (
 
 
 export const getJoinPlaylistMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof joinPlaylist>>, TError,{playlistId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof joinPlaylist>>, TError,{playlistId: number}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof joinPlaylist>>, TError,{playlistInviteCode: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof joinPlaylist>>, TError,{playlistInviteCode: string}, TContext> => {
 
 const mutationKey = ['joinPlaylist'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -222,10 +222,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof joinPlaylist>>, {playlistId: number}> = (props) => {
-          const {playlistId} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof joinPlaylist>>, {playlistInviteCode: string}> = (props) => {
+          const {playlistInviteCode} = props ?? {};
 
-          return  joinPlaylist(playlistId,requestOptions)
+          return  joinPlaylist(playlistInviteCode,requestOptions)
         }
 
         
@@ -241,76 +241,15 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
  * @summary Join an existing playlist
  */
 export const useJoinPlaylist = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof joinPlaylist>>, TError,{playlistId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof joinPlaylist>>, TError,{playlistInviteCode: string}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof joinPlaylist>>,
         TError,
-        {playlistId: number},
+        {playlistInviteCode: string},
         TContext
       > => {
 
       const mutationOptions = getJoinPlaylistMutationOptions(options);
-
-      return useMutation(mutationOptions, queryClient);
-    }
-    /**
- * @summary Leave playlist
- */
-export const leavePlaylist = (
-    playlistId: number,
- options?: SecondParameter<typeof customInstance>,) => {
-      
-      
-      return customInstance<void>(
-      {url: `/api/users/me/playlists/${playlistId}`, method: 'DELETE'
-    },
-      options);
-    }
-  
-
-
-export const getLeavePlaylistMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof leavePlaylist>>, TError,{playlistId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof leavePlaylist>>, TError,{playlistId: number}, TContext> => {
-
-const mutationKey = ['leavePlaylist'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-      
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof leavePlaylist>>, {playlistId: number}> = (props) => {
-          const {playlistId} = props ?? {};
-
-          return  leavePlaylist(playlistId,requestOptions)
-        }
-
-        
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type LeavePlaylistMutationResult = NonNullable<Awaited<ReturnType<typeof leavePlaylist>>>
-    
-    export type LeavePlaylistMutationError = unknown
-
-    /**
- * @summary Leave playlist
- */
-export const useLeavePlaylist = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof leavePlaylist>>, TError,{playlistId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof leavePlaylist>>,
-        TError,
-        {playlistId: number},
-        TContext
-      > => {
-
-      const mutationOptions = getLeavePlaylistMutationOptions(options);
 
       return useMutation(mutationOptions, queryClient);
     }
@@ -622,3 +561,65 @@ export function useGetUser<TData = Awaited<ReturnType<typeof getUser>>, TError =
 
 
 
+/**
+ * @summary Leave playlist
+ */
+export const leavePlaylist = (
+    playlistId: number,
+ options?: SecondParameter<typeof customInstance>,) => {
+      
+      
+      return customInstance<void>(
+      {url: `/api/users/me/playlists/${playlistId}`, method: 'DELETE'
+    },
+      options);
+    }
+  
+
+
+export const getLeavePlaylistMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof leavePlaylist>>, TError,{playlistId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof leavePlaylist>>, TError,{playlistId: number}, TContext> => {
+
+const mutationKey = ['leavePlaylist'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof leavePlaylist>>, {playlistId: number}> = (props) => {
+          const {playlistId} = props ?? {};
+
+          return  leavePlaylist(playlistId,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type LeavePlaylistMutationResult = NonNullable<Awaited<ReturnType<typeof leavePlaylist>>>
+    
+    export type LeavePlaylistMutationError = unknown
+
+    /**
+ * @summary Leave playlist
+ */
+export const useLeavePlaylist = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof leavePlaylist>>, TError,{playlistId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof leavePlaylist>>,
+        TError,
+        {playlistId: number},
+        TContext
+      > => {
+
+      const mutationOptions = getLeavePlaylistMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    

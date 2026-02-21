@@ -121,6 +121,7 @@ public class AuthService {
         newToken.setToken(tokenValue);
         newToken.setUser(user);
         newToken.setExpiresAt(Instant.now().plusSeconds(jwtUtil.getRefreshExpirationSeconds()));
+        refreshTokenRepository.save(newToken);
         return tokenValue;
     }
 }

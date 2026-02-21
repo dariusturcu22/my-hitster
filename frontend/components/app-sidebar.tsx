@@ -74,21 +74,20 @@ export function AppSidebar({
   };
 
   const handleJoinPlaylist = () => {
-    const id = parseInt(joinId);
-    if (!joinId.trim || isNaN(id)) {
-      setJoinError("Enter a valid playlist join link");
+    if (!joinId.trim()) {
+      setJoinError("Enter a valid invite code");
       return;
     }
 
     joinPlaylist(
-      { playlistId: id },
+      { playlistInviteCode: joinId },
       {
-        onSuccess: () => {
+        onSuccess: (playlist) => {
           queryClient.invalidateQueries({
             queryKey: getGetUserPlaylistsQueryKey(),
           });
           setJoinExpanded(false);
-          router.push(`/playlists/${id}`);
+          router.push(`/playlists/${playlist.id}`);
         },
         onError: (error: any) => {
           setJoinError(error?.response?.data?.message || "Playlist not found");
@@ -160,7 +159,7 @@ export function AppSidebar({
                   <div className="flex gap-1.5">
                     <Input
                       ref={joinInputRef}
-                      placeholder="Playlist ID"
+                      placeholder="Invite code"
                       value={joinId}
                       onChange={(e) => {
                         setJoinId(e.target.value);

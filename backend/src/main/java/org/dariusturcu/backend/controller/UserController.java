@@ -71,10 +71,10 @@ public class UserController {
     }
 
     @Operation(summary = "Join an existing playlist")
-    @PostMapping("/me/playlists/{playlistId}")
+    @PostMapping("/me/playlists/{playlistInviteCode}")
     public ResponseEntity<PlaylistSummaryDTO> joinPlaylist(
-            @PathVariable Long playlistId) {
-        PlaylistSummaryDTO joinedPlaylist = userService.joinPlaylist(playlistId);
+            @PathVariable String playlistInviteCode) {
+        PlaylistSummaryDTO joinedPlaylist = userService.joinPlaylist(playlistInviteCode);
         return ResponseEntity.ok(joinedPlaylist);
     }
 

@@ -80,9 +80,8 @@ export function DataTable({
   inviteCode,
   onDelete,
   onLeave,
-  isLoading = false,
 }: SongsDataTableProps) {
-  const { data: playlist } = useGetPlaylist(playlistId);
+  const { data: playlist, isLoading } = useGetPlaylist(playlistId);
 
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -204,7 +203,7 @@ export function DataTable({
     return (
       <div className="w-full flex flex-col gap-6">
         <div className="h-96 flex items-center justify-center">
-          <div className="text-muted-foreground">Loading songs...</div>
+          <div className="text-muted-foreground">Loading playlist data...</div>
         </div>
       </div>
     );
@@ -229,6 +228,13 @@ export function DataTable({
           </div>
 
           <div className="flex items-center gap-2">
+            <span>
+              {playlist?.users
+                .map((user) => {
+                  user.username;
+                })
+                .join(", ")}
+            </span>
             <Link href={`/playlists/${playlistId}/songs/add`}>
               <Button variant="outline" size="sm">
                 <IconPlus />

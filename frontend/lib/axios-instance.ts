@@ -17,6 +17,17 @@ AXIOS_INSTANCE.interceptors.request.use((config) => {
   return config;
 });
 
+let isRefreshing = false;
+let failedQueue: Array<{
+  resolve: (value: unknown) => void;
+  reject: (reason?: unknown) => void;
+}> = [];
+
+const processQueue = (error: unknown) => {
+  failedQueue.forEach((p) => (error ? p.reject(error) : p.resolve(null)));
+  failedQueue = [];
+};
+
 AXIOS_INSTANCE.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -29,7 +40,15 @@ AXIOS_INSTANCE.interceptors.response.use(
       !isAuthEndpoint &&
       !originalRequest._retry
     ) {
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then(() => AXIOS_INSTANCE(originalRequest))
+          .catch((error) => Promise.reject(error));
+      }
       originalRequest._retry = true;
+      isRefreshing = true;
 
       try {
         await axios.post(
@@ -42,6 +61,8 @@ AXIOS_INSTANCE.interceptors.response.use(
       } catch (refreshError) {
         window.location.href = "/login";
         return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
       }
     }
 

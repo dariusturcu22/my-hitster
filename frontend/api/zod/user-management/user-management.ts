@@ -11,14 +11,7 @@ import * as zod from 'zod';
  * @summary Join an existing playlist
  */
 export const joinPlaylistParams = zod.object({
-  "playlistId": zod.number()
-})
-
-/**
- * @summary Leave playlist
- */
-export const leavePlaylistParams = zod.object({
-  "playlistId": zod.number()
+  "playlistInviteCode": zod.string()
 })
 
 /**
@@ -39,5 +32,12 @@ export const updateUserBody = zod.object({
  */
 export const getUserParams = zod.object({
   "userId": zod.number()
+})
+
+/**
+ * @summary Leave playlist
+ */
+export const leavePlaylistParams = zod.object({
+  "playlistId": zod.number()
 })
 
