@@ -8,6 +8,8 @@ public record PlaylistSummaryDTO(
         @NotNull
         String name,
         @NotNull
+        String color,
+        @NotNull
         int songCount
 ) {
 }

@@ -8,5 +8,6 @@
 export interface PlaylistSummaryDTO {
   id: number;
   name: string;
+  color: string;
   songCount: number;
 }

@@ -6,7 +6,15 @@ import { SidebarInset, SidebarProvider } from "@/components/shadcn/sidebar";
 import React, { use } from "react";
 
 import PlaylistContent from "./PlaylistContent";
-import { useGetUserPlaylists } from "@/api/generated/user-management/user-management";
+import {
+  getGetUserPlaylistsQueryKey,
+  useGetUserPlaylists,
+} from "@/api/generated/user-management/user-management";
+import {
+  getGetPlaylistQueryKey,
+  useUpdatePlaylist,
+} from "@/api/generated/playlist-management/playlist-management";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface PageProps {
   params: Promise<{ playlistId: string }>;
@@ -16,6 +24,37 @@ export default function PlaylistPage({ params }: PageProps) {
   const { playlistId: rawId } = use(params);
   const playlistId = parseInt(rawId);
   const { data: playlists, isLoading, isError, error } = useGetUserPlaylists();
+  const { mutate: updatePlaylist } = useUpdatePlaylist();
+  const queryClient = useQueryClient();
+
+  const handleTitleChange = (name: string) => {
+    updatePlaylist(
+      { playlistId, data: { name } },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({
+            queryKey: getGetUserPlaylistsQueryKey(),
+          });
+          queryClient.invalidateQueries({
+            queryKey: getGetPlaylistQueryKey(playlistId),
+          });
+        },
+      },
+    );
+  };
+
+  const handleColorChange = (color: string) => {
+    updatePlaylist(
+      { playlistId, data: { color: color.replace("#", "") } },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({
+            queryKey: getGetPlaylistQueryKey(playlistId),
+          });
+        },
+      },
+    );
+  };
 
   if (isLoading) {
     return <div>Loading playlists...</div>;
@@ -48,7 +87,14 @@ export default function PlaylistPage({ params }: PageProps) {
         currentPlaylistId={currentPlaylist?.id}
       />
       <SidebarInset>
-        <SiteHeader title={currentPlaylist?.name} />
+        <SiteHeader
+          title={currentPlaylist?.name}
+          color={
+            currentPlaylist?.color ? `#${currentPlaylist.color}` : undefined
+          }
+          onTitleChange={handleTitleChange}
+          onColorChange={handleColorChange}
+        />
         <PlaylistContent playlistId={playlistId} />
       </SidebarInset>
     </SidebarProvider>

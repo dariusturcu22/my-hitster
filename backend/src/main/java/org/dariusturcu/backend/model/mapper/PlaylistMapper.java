@@ -24,6 +24,7 @@ public class PlaylistMapper {
         return new PlaylistSummaryDTO(
                 playlist.getId(),
                 playlist.getName(),
+                playlist.getColor(),
                 playlist.getSongCount()
         );
     }

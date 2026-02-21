@@ -9,14 +9,27 @@ import { Button } from "@/components/shadcn/button";
 
 export function SiteHeader({
   title = "Playlists",
+  color,
   onTitleChange,
+  onColorChange,
 }: {
   title?: string;
+  color?: string;
   onTitleChange?: (newTitle: string) => void;
+  onColorChange?: (newColor: string) => void;
 }) {
   const [isEditing, setIsEditing] = React.useState(false);
-  const [value, setValue] = React.useState(title);
+  const [titleValue, setTitleValue] = React.useState(title);
+  const [colorValue, setColorValue] = React.useState(title);
   const inputRef = React.useRef<HTMLInputElement>(null);
+
+  React.useEffect(() => {
+    setTitleValue(title);
+  }, [title]);
+
+  React.useEffect(() => {
+    setColorValue(color ?? "#000000");
+  }, [color]);
 
   React.useEffect(() => {
     if (isEditing) {
@@ -26,16 +39,16 @@ export function SiteHeader({
   }, [isEditing]);
 
   const handleSave = () => {
-    if (value.trim() === "") {
+    if (titleValue.trim() === "") {
       handleCancel();
       return;
     }
-    onTitleChange?.(value.trim());
+    onTitleChange?.(titleValue.trim());
     setIsEditing(false);
   };
 
   const handleCancel = () => {
-    setValue(title);
+    setTitleValue(title);
     setIsEditing(false);
   };
 
@@ -56,8 +69,8 @@ export function SiteHeader({
           <div className="flex items-center gap-1">
             <Input
               ref={inputRef}
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
+              value={titleValue}
+              onChange={(e) => setTitleValue(e.target.value)}
               onKeyDown={handleKeyDown}
               className="h-7 text-sm font-medium py-0 px-2 w-48"
             />
@@ -90,6 +103,18 @@ export function SiteHeader({
               <IconPencil className="size-3.5" />
             </Button>
           </div>
+        )}
+
+        {onColorChange && (
+          <Input
+            type="color"
+            value={colorValue}
+            onChange={(e) => setColorValue(e.target.value)}
+            onBlur={() => {
+              onColorChange(colorValue);
+            }}
+            className="size-8 p-0 border-none rounded shadow-sm shrink-0 cursor-pointer overflow-hidden"
+          />
         )}
       </div>
     </header>

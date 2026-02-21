@@ -229,11 +229,7 @@ export function DataTable({
 
           <div className="flex items-center gap-2">
             <span>
-              {playlist?.users
-                .map((user) => {
-                  user.username;
-                })
-                .join(", ")}
+              {playlist?.users.map((user) => user.username).join(", ")}
             </span>
             <Link href={`/playlists/${playlistId}/songs/add`}>
               <Button variant="outline" size="sm">
