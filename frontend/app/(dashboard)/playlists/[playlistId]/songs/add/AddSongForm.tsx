@@ -11,19 +11,25 @@ import {
   IconCheck,
 } from "@tabler/icons-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
+import {
+  getGetPlaylistQueryKey,
+  useCreateSong,
+} from "@/api/generated/playlist-management/playlist-management";
+import { getSongMetadata } from "@/api/generated/song-metadata/song-metadata";
 
 type Step = "youtube" | "preview" | "details";
 
 interface SongDetails {
   title: string;
   artist: string;
-  releaseYear: string;
+  releaseYear: string | number;
   gradientColor1: string;
   gradientColor2: string;
 }
 
 function extractYoutubeId(input: string): string | null {
-  // Handle plain ID (no slashes or dots)
   if (/^[a-zA-Z0-9_-]{11}$/.test(input.trim())) return input.trim();
 
   try {
@@ -32,13 +38,21 @@ function extractYoutubeId(input: string): string | null {
     if (url.hostname === "youtu.be") return url.pathname.slice(1).split("?")[0];
     if (url.pathname.startsWith("/embed/"))
       return url.pathname.split("/embed/")[1].split("?")[0];
-  } catch {
-    // not valid
-  }
+  } catch {}
   return null;
 }
 
-export function AddSongForm({ backPath }: { backPath: string }) {
+export function AddSongForm({
+  backPath,
+  playlistId,
+}: {
+  backPath: string;
+  playlistId: number;
+}) {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const { mutate: addSong, isPending: isAdding } = useCreateSong();
+
   const [step, setStep] = useState<Step>("youtube");
   const [youtubeInput, setYoutubeInput] = useState("");
   const [youtubeId, setYoutubeId] = useState<string | null>(null);
@@ -71,25 +85,16 @@ export function AddSongForm({ backPath }: { backPath: string }) {
     setAiError("");
 
     try {
-      // TODO replace with real orval generated query
-      const response = await fetch("", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({}),
+      const songData = await getSongMetadata({
+        youtubeUrl: `youtube.com/watch?v=${youtubeId}`,
       });
 
-      const data = await response.json();
-      const text = data.content?.[0]?.text ?? "";
-
-      const clean = text.replace(/```json|```/g, "").trim();
-      const parsed = JSON.parse(clean);
-
       setFormData({
-        title: parsed.title ?? "",
-        artist: parsed.artist ?? "",
-        releaseYear: parsed.releaseYear ?? "",
-        gradientColor1: parsed.gradientColor1 ?? "#8B5CF6",
-        gradientColor2: parsed.gradientColor2 ?? "#EC4899",
+        title: songData.content?.title ?? "",
+        artist: songData.content?.artist ?? "",
+        releaseYear: songData.content?.releaseYear ?? "",
+        gradientColor1: songData.content?.gradientColor1 ?? "#8B5CF6",
+        gradientColor2: songData.content?.gradientColor2 ?? "#EC4899",
       });
       setStep("details");
     } catch {
@@ -107,6 +112,44 @@ export function AddSongForm({ backPath }: { backPath: string }) {
 
   const handleColorChange = (id: string, value: string) => {
     setFormData((prev) => ({ ...prev, [id]: value }));
+  };
+
+  const handleSubmit = () => {
+    console.log("submit", { youtubeId, formData, playlistId });
+    if (
+      !youtubeId ||
+      !formData.title ||
+      !formData.artist ||
+      !formData.releaseYear
+    ) {
+      console.log("validation failed");
+      return;
+    }
+    addSong(
+      {
+        playlistId,
+        data: {
+          youtubeId,
+          title: formData.title,
+          artist: formData.artist,
+          releaseYear:
+            typeof formData.releaseYear === "string"
+              ? parseInt(formData.releaseYear)
+              : formData.releaseYear,
+          gradientColor1: formData.gradientColor1.replace("#", ""),
+          gradientColor2: formData.gradientColor2.replace("#", ""),
+        },
+      },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({
+            queryKey: getGetPlaylistQueryKey(playlistId),
+          });
+          router.push(`/playlists/${playlistId}`);
+        },
+        onError: () => {},
+      },
+    );
   };
 
   return (
@@ -309,7 +352,9 @@ export function AddSongForm({ backPath }: { backPath: string }) {
           </div>
 
           <div className="flex gap-3 justify-center">
-            <Button className="px-10">Add Song</Button>
+            <Button onClick={handleSubmit} className="px-10">
+              {isAdding ? "Adding..." : "Add Song"}
+            </Button>
             <Button variant="outline" className="px-10" asChild>
               <Link href={backPath}>Cancel</Link>
             </Button>

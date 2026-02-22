@@ -6,9 +6,43 @@ import { Label } from "@/components/shadcn/label";
 import { Button } from "@/components/shadcn/button";
 import { IconExternalLink } from "@tabler/icons-react";
 import Link from "next/link";
+import { SongDTO } from "@/api/models";
+import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
+import {
+  getGetPlaylistQueryKey,
+  getGetSongQueryKey,
+  useUpdateSong,
+} from "@/api/generated/playlist-management/playlist-management";
 
-export function SongForm({ song, backPath }: { song: any; backPath: string }) {
-  const [formData, setFormData] = useState(song);
+interface SongFormProps {
+  song: SongDTO;
+  backPath: string;
+  playlistId: number;
+}
+
+interface SongFormData {
+  youtubeId: string;
+  title: string;
+  artist: string;
+  releaseYear: number | string;
+  gradientColor1: string;
+  gradientColor2: string;
+}
+
+export function SongForm({ song, backPath, playlistId }: SongFormProps) {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const { mutate: updateSong, isPending } = useUpdateSong();
+
+  const [formData, setFormData] = useState<SongFormData>({
+    youtubeId: song.youtubeId,
+    title: song.title,
+    artist: song.artist,
+    releaseYear: song.releaseYear,
+    gradientColor1: song.gradientColor1 ? `#${song.gradientColor1}` : "#8B5CF6",
+    gradientColor2: song.gradientColor2 ? `#${song.gradientColor2}` : "#EC4899",
+  });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
@@ -17,6 +51,37 @@ export function SongForm({ song, backPath }: { song: any; backPath: string }) {
 
   const handleColorChange = (id: string, value: string) => {
     setFormData((prev: any) => ({ ...prev, [id]: value }));
+  };
+
+  const handleSubmit = () => {
+    updateSong(
+      {
+        playlistId,
+        songId: song.id,
+        data: {
+          youtubeId: formData.youtubeId,
+          title: formData.title,
+          artist: formData.artist,
+          releaseYear:
+            typeof formData.releaseYear === "string"
+              ? parseInt(formData.releaseYear)
+              : formData.releaseYear,
+          gradientColor1: formData.gradientColor1.replace("#", ""),
+          gradientColor2: formData.gradientColor2.replace("#", ""),
+        },
+      },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({
+            queryKey: getGetSongQueryKey(playlistId, song.id),
+          });
+          queryClient.invalidateQueries({
+            queryKey: getGetPlaylistQueryKey(playlistId),
+          });
+          router.push(backPath);
+        },
+      },
+    );
   };
 
   return (
@@ -162,7 +227,9 @@ export function SongForm({ song, backPath }: { song: any; backPath: string }) {
       </div>
 
       <div className="flex gap-3 justify-center">
-        <Button className="px-10">Save Changes</Button>
+        <Button className="px-10" onClick={handleSubmit} disabled={isPending}>
+          {isPending ? "Saving..." : "Save Changes"}
+        </Button>
         <Button variant="outline" className="px-10" asChild>
           <Link href={backPath}>Cancel</Link>
         </Button>

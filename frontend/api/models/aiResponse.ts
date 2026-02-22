@@ -4,9 +4,10 @@
  * OpenAPI definition
  * OpenAPI spec version: v0
  */
+import type { SongMetadataResponse } from './songMetadataResponse';
 
 export interface AiResponse {
-  content?: string;
+  content?: SongMetadataResponse;
   model?: string;
   durationMs?: number;
   timestamp?: string;

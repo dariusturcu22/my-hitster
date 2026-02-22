@@ -27,3 +27,4 @@ export * from "./updateSongRequestSongTag";
 export * from "./updateUserRequest";
 export * from "./userDetailDTO";
 export * from "./userSummaryDTO";
+export * from './songMetadataResponse';

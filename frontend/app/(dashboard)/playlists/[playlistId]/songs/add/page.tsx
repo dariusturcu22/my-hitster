@@ -44,7 +44,7 @@ export default function AddSongPage({ params }: PageProps) {
               </Link>
             </Button>
           </div>
-          <AddSongForm backPath={backPath} />
+          <AddSongForm backPath={backPath} playlistId={playlistId} />
         </div>
       </SidebarInset>
     </SidebarProvider>

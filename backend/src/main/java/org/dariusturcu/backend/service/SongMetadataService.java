@@ -1,7 +1,9 @@
 package org.dariusturcu.backend.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.dariusturcu.backend.model.ai.AiResponse;
+import org.dariusturcu.backend.model.ai.SongMetadataResponse;
 import org.dariusturcu.backend.service.metadata.GeniusService;
 import org.dariusturcu.backend.service.metadata.MusicBrainzService;
 import org.dariusturcu.backend.service.metadata.WikipediaService;
@@ -25,6 +27,7 @@ public class SongMetadataService {
     private final MusicBrainzService musicBrainzService;
     private final WikipediaService wikipediaService;
     private final GeniusService geniusService;
+    private final ObjectMapper objectMapper;
 
     @Value("${spring.ai.openai.chat.options.model:gpt-5.1}")
     private String aiModel;
@@ -36,7 +39,7 @@ public class SongMetadataService {
             Map<String, Object> allMetadata = gatherAllMetadata(youtubeUrl);
             String prompt = MetadataPromptBuilder.build(allMetadata);
 
-            String response = chatClientBuilder.build()
+            String raw = chatClientBuilder.build()
                     .prompt()
                     .user(prompt)
                     .options(OpenAiChatOptions.builder()
@@ -46,13 +49,17 @@ public class SongMetadataService {
                     .call()
                     .content();
 
+            assert raw != null;
+            String clean = raw.replaceAll("```json|```", "").trim();
+            SongMetadataResponse parsed = objectMapper.readValue(clean, SongMetadataResponse.class);
+
             long duration = System.currentTimeMillis() - startTime;
 
-            return new AiResponse(response, aiModel, duration, LocalDateTime.now(), "SUCCESS");
+            return new AiResponse(parsed, aiModel, duration, LocalDateTime.now(), "SUCCESS");
 
         } catch (Exception e) {
             return new AiResponse(
-                    "Error: " + e.getMessage(),
+                    null,
                     aiModel,
                     0,
                     LocalDateTime.now(),

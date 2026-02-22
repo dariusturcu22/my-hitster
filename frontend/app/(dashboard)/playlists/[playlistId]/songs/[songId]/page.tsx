@@ -1,31 +1,28 @@
+"use client";
+
 import { AppSidebar } from "@/components/app-sidebar";
 import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/shadcn/sidebar";
 import { Button } from "@/components/shadcn/button";
 import { IconArrowLeft } from "@tabler/icons-react";
 import Link from "next/link";
-import React from "react";
+import React, { use } from "react";
 import { SongForm } from "./SongForm";
+import { useGetSong } from "@/api/generated/playlist-management/playlist-management";
+import { useGetUserPlaylists } from "@/api/generated/user-management/user-management";
 
-import songsData from "../../data.json";
-import playlistsData from "@/app/data/playlists.json";
-
-export default async function SongDetailPage({
-  params,
-}: {
+interface PageProps {
   params: Promise<{ playlistId: string; songId: string }>;
-}) {
-  const { playlistId, songId } = await params;
-  const playlistIdNumber = parseInt(playlistId);
-  const songIdNumber = parseInt(songId);
+}
 
-  const song = songsData.find(
-    (s) => s.id === songIdNumber && s.playlistId === playlistIdNumber,
-  );
-
-  if (!song) return <div className="p-8">Song not found</div>;
-
+export default function SongDetailPage({ params }: PageProps) {
+  const { playlistId: rawPlaylistId, songId: rawSongId } = use(params);
+  const playlistId = parseInt(rawPlaylistId);
+  const songId = parseInt(rawSongId);
   const backPath = `/playlists/${playlistId}`;
+
+  const { data: playlists } = useGetUserPlaylists();
+  const { data: song } = useGetSong(playlistId, songId);
 
   return (
     <SidebarProvider
@@ -38,11 +35,11 @@ export default async function SongDetailPage({
     >
       <AppSidebar
         variant="inset"
-        playlists={playlistsData}
-        currentPlaylistId={playlistIdNumber}
+        playlists={playlists}
+        currentPlaylistId={playlistId}
       />
       <SidebarInset>
-        <SiteHeader title={song.title} />
+        <SiteHeader title={song?.title} />
 
         <div className="flex flex-1 flex-col p-4 md:p-6">
           <div className="mb-6">
@@ -54,11 +51,19 @@ export default async function SongDetailPage({
             </Button>
           </div>
 
-          <SongForm song={song} backPath={backPath} />
+          {song && (
+            <>
+              <SongForm
+                song={song}
+                backPath={backPath}
+                playlistId={playlistId}
+              />
 
-          <div className="text-center text-[10px] text-muted-foreground mt-4">
-            Added by {song.addedBy.name}
-          </div>
+              <div className="text-center text-[10px] text-muted-foreground mt-4">
+                Added by {song.addedBy.username}
+              </div>
+            </>
+          )}
         </div>
       </SidebarInset>
     </SidebarProvider>

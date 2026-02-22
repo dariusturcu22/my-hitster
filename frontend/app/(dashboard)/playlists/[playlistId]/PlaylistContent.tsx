@@ -32,7 +32,9 @@ export default function PlaylistContent({ playlistId }: PlaylistContentProps) {
       { playlistId, songId },
       {
         onSuccess: () => {
-          queryClient.invalidateQueries({ queryKey: getGetPlaylistQueryKey() });
+          queryClient.invalidateQueries({
+            queryKey: getGetPlaylistQueryKey(playlistId),
+          });
         },
       },
     );

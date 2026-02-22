@@ -3,7 +3,7 @@ package org.dariusturcu.backend.model.ai;
 import java.time.LocalDateTime;
 
 public record AiResponse(
-        String content,
+        SongMetadataResponse content,
         String model,
         long durationMs,
         LocalDateTime timestamp,
