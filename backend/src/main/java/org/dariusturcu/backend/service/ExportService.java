@@ -21,6 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -30,35 +32,31 @@ public class ExportService {
     private final PlaylistRepository playlistRepository;
 
     public byte[] generatePdf(Long playlistId) {
-        Playlist playlist = playlistRepository.findById(playlistId)
-                .orElseThrow(() -> new ResourceNotFoundException(ResourceType.PLAYLIST, playlistId));
-
-        boolean hasAccess = playlist.getUsers().stream()
-                .anyMatch(user -> user.getId().equals(SecurityUtils.getCurrentUserId()));
-
-        // TODO custom exception
-        if (!hasAccess) {
-            throw new RuntimeException("Access denied: You are not a member of this playlist");
-        }
-
-        List<Song> songs = playlist.getSongs();
-
-        if (songs.isEmpty()) {
-            throw new RuntimeException("Playlist has no songs to generate PDF for");
-        }
-
+        List<Song> songs = getValidatedSongs(playlistId);
         try {
-            return buildPdf(songs);
+            return buildPdf(songs, false);
         } catch (Exception e) {
             throw new RuntimeException("Failed to generate PDF: " + e.getMessage());
         }
     }
 
-    private byte[] buildPdf(List<Song> songs) throws IOException {
+    private byte[] buildPdf(List<Song> songs, boolean isQr) throws IOException {
         PDDocument document = new PDDocument();
 
-        addImagePage(document, CardGenerator.generateInfoPage(songs));
-        addImagePage(document, QRGenerator.generateQRPage(songs));
+        List<List<Song>> chunks = new ArrayList<>();
+        int pageSize = 12;
+        for (int i = 0; i < songs.size(); i += pageSize) {
+            chunks.add(songs.subList(i, Math.min(i + pageSize, songs.size())));
+        }
+
+        if (isQr) Collections.reverse(chunks);
+
+        for (List<Song> chunk : chunks) {
+            BufferedImage image = isQr
+                    ? QRGenerator.generateQRPage(chunk)
+                    : CardGenerator.generateInfoPage(chunk);
+            addImagePage(document, image);
+        }
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         document.save(outputStream);
@@ -79,5 +77,43 @@ public class ExportService {
         PDPageContentStream contentStream = new PDPageContentStream(document, page);
         contentStream.drawImage(pdImage, 0, 0, page.getMediaBox().getWidth(), page.getMediaBox().getHeight());
         contentStream.close();
+    }
+
+    public byte[] generateInfoPdf(Long playlistId) {
+        List<Song> songs = getValidatedSongs(playlistId);
+        try {
+            return buildPdf(songs, false);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to generate PDF: " + e.getMessage());
+        }
+    }
+
+    public byte[] generateQrPdf(Long playlistId) {
+        List<Song> songs = getValidatedSongs(playlistId);
+        try {
+            return buildPdf(songs, true);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to generate PDF: " + e.getMessage());
+        }
+    }
+
+    private List<Song> getValidatedSongs(Long playlistId) {
+        Playlist playlist = playlistRepository.findById(playlistId)
+                .orElseThrow(() -> new ResourceNotFoundException(ResourceType.PLAYLIST, playlistId));
+
+        boolean hasAccess = playlist.getUsers().stream()
+                .anyMatch(user -> user.getId().equals(SecurityUtils.getCurrentUserId()));
+
+        // TODO custom exception
+        if (!hasAccess) {
+            throw new RuntimeException("Access denied: You are not a member of this playlist");
+        }
+
+        List<Song> songs = playlist.getSongs();
+
+        if (songs.isEmpty()) {
+            throw new RuntimeException("Playlist has no songs to generate PDF for");
+        }
+        return songs;
     }
 }

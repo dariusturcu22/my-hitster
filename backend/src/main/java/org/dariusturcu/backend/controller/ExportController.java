@@ -20,18 +20,39 @@ import org.springframework.web.bind.annotation.RestController;
 public class ExportController {
     private final ExportService exportService;
 
-    @Operation(summary = "Generate PDF for playlist songs")
+    @Operation(summary = "Generate info PDF for playlist songs")
     @GetMapping("/{playlistId}/export")
     public ResponseEntity<byte[]> exportPlaylist(
             @PathVariable Long playlistId
     ) {
         byte[] pdfBytes = exportService.generatePdf(playlistId);
+        return buildPdfResponse(pdfBytes, "playlist-" + playlistId + ".pdf");
+    }
 
+    @Operation(summary = "Generate QR PDF for playlist songs")
+    @GetMapping("/{playlistId}/export/info")
+    public ResponseEntity<byte[]> exportPlaylistInfo(
+            @PathVariable Long playlistId
+    ) {
+        byte[] pdfBytes = exportService.generateInfoPdf(playlistId);
+        return buildPdfResponse(pdfBytes, "info-" + playlistId + ".pdf");
+    }
+
+    @Operation(summary = "Generate PDF for playlist songs")
+    @GetMapping("/{playlistId}/export/qr")
+    public ResponseEntity<byte[]> exportPlaylistQr(
+            @PathVariable Long playlistId
+    ) {
+        byte[] pdfBytes = exportService.generateQrPdf(playlistId);
+        return buildPdfResponse(pdfBytes, "qr-" + playlistId + ".pdf");
+    }
+
+    private ResponseEntity<byte[]> buildPdfResponse(byte[] pdfBytes, String filename) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);
         headers.setContentDispositionFormData(
                 "attachment",
-                "playlist-" + playlistId + ".pdf"
+                filename
         );
         headers.setContentLength(pdfBytes.length);
 

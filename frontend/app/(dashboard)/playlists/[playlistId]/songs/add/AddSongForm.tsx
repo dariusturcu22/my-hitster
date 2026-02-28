@@ -152,6 +152,10 @@ export function AddSongForm({
     );
   };
 
+  const handleSkipAi = () => {
+    setStep("details");
+  };
+
   return (
     <div className="mx-auto w-full max-w-xl flex flex-col gap-6">
       <div className="grid gap-3">
@@ -211,23 +215,32 @@ export function AddSongForm({
             </Button>
 
             {step === "preview" && (
-              <Button
-                onClick={handleGetDetails}
-                disabled={isLoadingAI}
-                className="gap-2"
-              >
-                {isLoadingAI ? (
-                  <>
-                    <IconLoader2 className="size-4 animate-spin" />
-                    Fetching details...
-                  </>
-                ) : (
-                  <>
-                    <IconSparkles className="size-4" />
-                    Get Details with AI
-                  </>
-                )}
-              </Button>
+              <>
+                <Button
+                  onClick={handleGetDetails}
+                  disabled={isLoadingAI}
+                  className="gap-2"
+                >
+                  {isLoadingAI ? (
+                    <>
+                      <IconLoader2 className="size-4 animate-spin" />
+                      Fetching details...
+                    </>
+                  ) : (
+                    <>
+                      <IconSparkles className="size-4" />
+                      Get Details with AI
+                    </>
+                  )}
+                </Button>
+                <Button
+                  onClick={handleSkipAi}
+                  disabled={isLoadingAI}
+                  className="gap-2"
+                >
+                  Enter manually
+                </Button>
+              </>
             )}
 
             {step === "details" && (

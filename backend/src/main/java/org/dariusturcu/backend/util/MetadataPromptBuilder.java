@@ -33,7 +33,7 @@ public class MetadataPromptBuilder {
         prompt.append("=== YOUTUBE VIDEO DATA ===\n");
         prompt.append(String.format("Video Title: %s\n", youtubeData.get("video_title")));
         prompt.append(String.format("Channel Name: %s\n", youtubeData.get("channel_title")));
-        prompt.append(String.format("Upload Year: %s (THIS IS NOT THE RELEASE YEAR!)\n", youtubeData.get("upload_year")));
+        prompt.append(String.format("Upload Year: %s (use ONLY as last resort fallback if no other source has the year)\n", youtubeData.get("upload_year")));
 
         String description = youtubeData.get("description");
         if (description != null && !description.isEmpty()) {
@@ -96,7 +96,7 @@ public class MetadataPromptBuilder {
         prompt.append("{\n");
         prompt.append("  \"artist\": \"actual artist name\",\n");
         prompt.append("  \"title\": \"actual song title (cleaned)\",\n");
-        prompt.append("  \"release_year\": \"YYYY format ONLY, or 'unknown'\",\n");
+        prompt.append("  \"release_year\": \"YYYY format. If unknown from all sources, use the YouTube upload year as fallback\",\n");
         prompt.append("  \"confidence\": \"high/medium/low\",\n");
         prompt.append("  \"source\": \"where you found the year\",\n");
         prompt.append("  \"reasoning\": \"explain in 1-2 sentences\"\n");

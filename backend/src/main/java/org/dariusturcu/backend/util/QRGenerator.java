@@ -16,18 +16,19 @@ import java.util.List;
 public class QRGenerator {
     private static final int CARD_SIZE = 800;
     private static final int CARDS_PER_ROW = 3;
+    private static final int ROWS_PER_PAGE = 4;
+    private static final int PAGE_WIDTH = CARD_SIZE * CARDS_PER_ROW;
+    private static final int PAGE_HEIGHT = CARD_SIZE * ROWS_PER_PAGE;
     private static final int QR_SIZE = 500;
+    private static final int MARGIN_X = (PAGE_WIDTH - CARD_SIZE * CARDS_PER_ROW) / 2;  // 40
+    private static final int MARGIN_Y = (PAGE_HEIGHT - CARD_SIZE * ROWS_PER_PAGE) / 2;  // 54
 
     public static BufferedImage generateQRPage(List<Song> songs) {
-        int width = CARD_SIZE * CARDS_PER_ROW;
-        int rows = (int) Math.ceil((double) songs.size() / CARDS_PER_ROW);
-        int height = CARD_SIZE * rows;
-
-        BufferedImage page = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        BufferedImage page = new BufferedImage(PAGE_WIDTH, PAGE_HEIGHT, BufferedImage.TYPE_INT_RGB);
         Graphics2D graphics2D = page.createGraphics();
 
         graphics2D.setColor(Color.WHITE);
-        graphics2D.fillRect(0, 0, width, height);
+        graphics2D.fillRect(0, 0, PAGE_WIDTH, PAGE_HEIGHT);
 
         for (int i = 0; i < songs.size(); i++) {
             int row = i / CARDS_PER_ROW;
@@ -35,8 +36,8 @@ public class QRGenerator {
 
             int backColumn = (CARDS_PER_ROW - 1) - col;
 
-            int x = backColumn * CARD_SIZE;
-            int y = row * CARD_SIZE;
+            int x = MARGIN_X + backColumn * CARD_SIZE;
+            int y = MARGIN_Y + row * CARD_SIZE;
 
             drawQRCard(graphics2D, x, y, CARD_SIZE, songs.get(i));
         }

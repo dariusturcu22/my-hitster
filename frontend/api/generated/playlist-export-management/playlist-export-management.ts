@@ -27,7 +27,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 /**
- * @summary Generate PDF for playlist songs
+ * @summary Generate info PDF for playlist songs
  */
 export const exportPlaylist = (
     playlistId: number,
@@ -98,7 +98,7 @@ export function useExportPlaylist<TData = Awaited<ReturnType<typeof exportPlayli
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary Generate PDF for playlist songs
+ * @summary Generate info PDF for playlist songs
  */
 
 export function useExportPlaylist<TData = Awaited<ReturnType<typeof exportPlaylist>>, TError = unknown>(
@@ -107,6 +107,190 @@ export function useExportPlaylist<TData = Awaited<ReturnType<typeof exportPlayli
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getExportPlaylistQueryOptions(playlistId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+/**
+ * @summary Generate PDF for playlist songs
+ */
+export const exportPlaylistQr = (
+    playlistId: number,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<string>(
+      {url: `/api/playlists/${playlistId}/export/qr`, method: 'GET', signal
+    },
+      options);
+    }
+  
+
+
+
+export const getExportPlaylistQrQueryKey = (playlistId?: number,) => {
+    return [
+    `/api/playlists/${playlistId}/export/qr`
+    ] as const;
+    }
+
+    
+export const getExportPlaylistQrQueryOptions = <TData = Awaited<ReturnType<typeof exportPlaylistQr>>, TError = unknown>(playlistId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof exportPlaylistQr>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getExportPlaylistQrQueryKey(playlistId);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof exportPlaylistQr>>> = ({ signal }) => exportPlaylistQr(playlistId, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(playlistId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof exportPlaylistQr>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ExportPlaylistQrQueryResult = NonNullable<Awaited<ReturnType<typeof exportPlaylistQr>>>
+export type ExportPlaylistQrQueryError = unknown
+
+
+export function useExportPlaylistQr<TData = Awaited<ReturnType<typeof exportPlaylistQr>>, TError = unknown>(
+ playlistId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof exportPlaylistQr>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof exportPlaylistQr>>,
+          TError,
+          Awaited<ReturnType<typeof exportPlaylistQr>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useExportPlaylistQr<TData = Awaited<ReturnType<typeof exportPlaylistQr>>, TError = unknown>(
+ playlistId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof exportPlaylistQr>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof exportPlaylistQr>>,
+          TError,
+          Awaited<ReturnType<typeof exportPlaylistQr>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useExportPlaylistQr<TData = Awaited<ReturnType<typeof exportPlaylistQr>>, TError = unknown>(
+ playlistId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof exportPlaylistQr>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Generate PDF for playlist songs
+ */
+
+export function useExportPlaylistQr<TData = Awaited<ReturnType<typeof exportPlaylistQr>>, TError = unknown>(
+ playlistId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof exportPlaylistQr>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getExportPlaylistQrQueryOptions(playlistId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+/**
+ * @summary Generate QR PDF for playlist songs
+ */
+export const exportPlaylistInfo = (
+    playlistId: number,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<string>(
+      {url: `/api/playlists/${playlistId}/export/info`, method: 'GET', signal
+    },
+      options);
+    }
+  
+
+
+
+export const getExportPlaylistInfoQueryKey = (playlistId?: number,) => {
+    return [
+    `/api/playlists/${playlistId}/export/info`
+    ] as const;
+    }
+
+    
+export const getExportPlaylistInfoQueryOptions = <TData = Awaited<ReturnType<typeof exportPlaylistInfo>>, TError = unknown>(playlistId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof exportPlaylistInfo>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getExportPlaylistInfoQueryKey(playlistId);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof exportPlaylistInfo>>> = ({ signal }) => exportPlaylistInfo(playlistId, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(playlistId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof exportPlaylistInfo>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ExportPlaylistInfoQueryResult = NonNullable<Awaited<ReturnType<typeof exportPlaylistInfo>>>
+export type ExportPlaylistInfoQueryError = unknown
+
+
+export function useExportPlaylistInfo<TData = Awaited<ReturnType<typeof exportPlaylistInfo>>, TError = unknown>(
+ playlistId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof exportPlaylistInfo>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof exportPlaylistInfo>>,
+          TError,
+          Awaited<ReturnType<typeof exportPlaylistInfo>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useExportPlaylistInfo<TData = Awaited<ReturnType<typeof exportPlaylistInfo>>, TError = unknown>(
+ playlistId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof exportPlaylistInfo>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof exportPlaylistInfo>>,
+          TError,
+          Awaited<ReturnType<typeof exportPlaylistInfo>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useExportPlaylistInfo<TData = Awaited<ReturnType<typeof exportPlaylistInfo>>, TError = unknown>(
+ playlistId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof exportPlaylistInfo>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Generate QR PDF for playlist songs
+ */
+
+export function useExportPlaylistInfo<TData = Awaited<ReturnType<typeof exportPlaylistInfo>>, TError = unknown>(
+ playlistId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof exportPlaylistInfo>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getExportPlaylistInfoQueryOptions(playlistId,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

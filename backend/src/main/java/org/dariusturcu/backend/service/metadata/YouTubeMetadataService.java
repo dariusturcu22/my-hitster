@@ -22,7 +22,7 @@ public class YouTubeMetadataService {
             String videoId = MetadataParser.extractYouTubeVideoId(url);
             String apiUrl = UrlBuilder.buildYoutubeApiLink(videoId, youtubeApiKey);
 
-            HttpURLConnection connection = HttpUtils.createGetConnection(url);
+            HttpURLConnection connection = HttpUtils.createGetConnection(apiUrl);
 
             JsonNode jsonRoot = MetadataParser.getJsonRoot(connection);
             JsonNode items = jsonRoot.path("items");

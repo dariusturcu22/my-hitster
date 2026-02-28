@@ -11,6 +11,7 @@ import org.dariusturcu.backend.model.user.User;
 import org.dariusturcu.backend.repository.RefreshTokenRepository;
 import org.dariusturcu.backend.repository.UserRepository;
 import org.dariusturcu.backend.security.util.JwtUtil;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -114,8 +115,10 @@ public class AuthService {
                 .ifPresent(refreshTokenRepository::delete);
     }
 
+    @Modifying
     public String createAndSaveRefreshToken(User user) {
         refreshTokenRepository.deleteRefreshTokenByUser(user);
+        refreshTokenRepository.flush();
         String tokenValue = jwtUtil.generateRefreshToken();
         RefreshToken newToken = new RefreshToken();
         newToken.setToken(tokenValue);

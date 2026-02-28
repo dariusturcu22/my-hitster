@@ -8,9 +8,23 @@ import * as zod from 'zod';
 
 
 /**
- * @summary Generate PDF for playlist songs
+ * @summary Generate info PDF for playlist songs
  */
 export const exportPlaylistParams = zod.object({
+  "playlistId": zod.number()
+})
+
+/**
+ * @summary Generate PDF for playlist songs
+ */
+export const exportPlaylistQrParams = zod.object({
+  "playlistId": zod.number()
+})
+
+/**
+ * @summary Generate QR PDF for playlist songs
+ */
+export const exportPlaylistInfoParams = zod.object({
   "playlistId": zod.number()
 })
 

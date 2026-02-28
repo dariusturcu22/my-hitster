@@ -13,6 +13,7 @@ import {
   IconDoorExit,
   IconCheck,
   IconHash,
+  IconFileExport,
 } from "@tabler/icons-react";
 import {
   flexRender,
@@ -81,6 +82,22 @@ export function DataTable({
   onDelete,
   onLeave,
 }: SongsDataTableProps) {
+  const handleExport = async () => {
+    for (const type of ["info", "qr"] as const) {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/playlists/${playlistId}/export/${type}`,
+        { credentials: "include" },
+      );
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `playlist-${playlistId}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  };
+
   const { data: playlist, isLoading } = useGetPlaylist(playlistId);
 
   const [rowSelection, setRowSelection] = React.useState({});
@@ -278,6 +295,20 @@ export function DataTable({
               <TooltipContent>
                 {copiedCode ? "Copied!" : "Copy invite code"}
               </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="size-8"
+                  onClick={handleExport}
+                >
+                  <IconFileExport className="size-4" />
+                  <span className="sr-only">Export playlist</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Export as PDF</TooltipContent>
             </Tooltip>
 
             <AlertDialog>
