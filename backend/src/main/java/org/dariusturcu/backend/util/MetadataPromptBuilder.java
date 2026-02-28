@@ -17,6 +17,7 @@ public class MetadataPromptBuilder {
         prompt.append("4. YouTube upload year is NOT the release year - ignore it unless nothing else exists\n");
         prompt.append("5. For soundtracks/game music/anime: find the game/show release year, NOT the upload year\n");
         prompt.append("6. Cross-reference multiple sources - if they disagree, explain why\n\n");
+        prompt.append("7. release_year must be an INTEGER (e.g. 1999), not a string\n");
 
         appendYouTubeData(prompt, allData);
         appendMusicBrainzData(prompt, allData);
@@ -97,6 +98,8 @@ public class MetadataPromptBuilder {
         prompt.append("  \"artist\": \"actual artist name\",\n");
         prompt.append("  \"title\": \"actual song title (cleaned)\",\n");
         prompt.append("  \"release_year\": \"YYYY format. If unknown from all sources, use the YouTube upload year as fallback\",\n");
+        prompt.append("  \"gradient_color1\": \"hex without #, fits the song vibe\",\n");
+        prompt.append("  \"gradient_color2\": \"hex without #, gradient pair for color1\",\n");
         prompt.append("  \"confidence\": \"high/medium/low\",\n");
         prompt.append("  \"source\": \"where you found the year\",\n");
         prompt.append("  \"reasoning\": \"explain in 1-2 sentences\"\n");
@@ -105,5 +108,14 @@ public class MetadataPromptBuilder {
         prompt.append("- high: MusicBrainz score >85 OR year explicitly stated OR multiple sources agree\n");
         prompt.append("- medium: MusicBrainz score 70-85 OR single reliable source\n");
         prompt.append("- low: Only YouTube data OR conflicting sources\n");
+        prompt.append("TITLE CLEANING RULES:\n");
+        prompt.append("- REMOVE: 'Remastered', 'Remaster', 'HD', 'HQ', '4K', 'Official Video', 'Official Audio', 'Lyrics', 'Lyric Video', 'Live', 'Live Version', 'Radio Edit', 'Single Version'\n");
+        prompt.append("- REMOVE year qualifiers like '2019 Remaster' or 'Remastered 2011'\n");
+        prompt.append("- KEEP: 'Remix', 'Mashup', 'feat.', 'ft.'\n");
+        prompt.append("- KEEP: 'Original Mix', 'Extended Mix'\n");
+        prompt.append("- Example: 'Big In Japan (2019 Remaster)' → 'Big In Japan'\n");
+        prompt.append("- Example: 'Somebody That I Used To Know (feat. Kimbra)' → keep as is\n");
+        prompt.append("- Example: 'Blinding Lights (Radio Edit)' → 'Blinding Lights'\n");
+        prompt.append("- Example: 'Somebody That I Used To Know - Remix' → keep as is\n");
     }
 }

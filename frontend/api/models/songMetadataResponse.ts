@@ -8,7 +8,7 @@
 export interface SongMetadataResponse {
   title?: string;
   artist?: string;
-  releaseYear?: number;
-  gradientColor1?: string;
-  gradientColor2?: string;
+  release_year?: number;
+  gradient_color1?: string;
+  gradient_color2?: string;
 }

@@ -92,9 +92,13 @@ export function AddSongForm({
       setFormData({
         title: songData.content?.title ?? "",
         artist: songData.content?.artist ?? "",
-        releaseYear: songData.content?.releaseYear ?? "",
-        gradientColor1: songData.content?.gradientColor1 ?? "#8B5CF6",
-        gradientColor2: songData.content?.gradientColor2 ?? "#EC4899",
+        releaseYear: songData.content?.release_year ?? "",
+        gradientColor1: songData.content?.gradient_color1
+          ? `#${songData.content.gradient_color1}`
+          : "#8B5CF6",
+        gradientColor2: songData.content?.gradient_color2
+          ? `#${songData.content.gradient_color2}`
+          : "#EC4899",
       });
       setStep("details");
     } catch {

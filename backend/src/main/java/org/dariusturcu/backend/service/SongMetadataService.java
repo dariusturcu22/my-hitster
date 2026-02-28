@@ -51,6 +51,7 @@ public class SongMetadataService {
 
             assert raw != null;
             String clean = raw.replaceAll("```json|```", "").trim();
+            System.out.println("AI RAW RESPONSE: " + clean);
             SongMetadataResponse parsed = objectMapper.readValue(clean, SongMetadataResponse.class);
 
             long duration = System.currentTimeMillis() - startTime;
