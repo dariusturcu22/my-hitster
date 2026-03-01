@@ -6,7 +6,11 @@ import { Label } from "@/components/shadcn/label";
 import { Button } from "@/components/shadcn/button";
 import { IconExternalLink } from "@tabler/icons-react";
 import Link from "next/link";
-import { SongDTO } from "@/api/models";
+import {
+  CreateSongRequestCountry,
+  CreateSongRequestSongTag,
+  SongDTO,
+} from "@/api/models";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -28,6 +32,8 @@ interface SongFormData {
   releaseYear: number | string;
   gradientColor1: string;
   gradientColor2: string;
+  songTag: CreateSongRequestSongTag;
+  country: CreateSongRequestCountry;
 }
 
 export function SongForm({ song, backPath, playlistId }: SongFormProps) {
@@ -42,6 +48,8 @@ export function SongForm({ song, backPath, playlistId }: SongFormProps) {
     releaseYear: song.releaseYear,
     gradientColor1: song.gradientColor1 ? `#${song.gradientColor1}` : "#8B5CF6",
     gradientColor2: song.gradientColor2 ? `#${song.gradientColor2}` : "#EC4899",
+    songTag: CreateSongRequestSongTag.NONE,
+    country: CreateSongRequestCountry.NONE,
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -68,6 +76,8 @@ export function SongForm({ song, backPath, playlistId }: SongFormProps) {
               : formData.releaseYear,
           gradientColor1: formData.gradientColor1.replace("#", ""),
           gradientColor2: formData.gradientColor2.replace("#", ""),
+          songTag: formData.songTag,
+          country: formData.country,
         },
       },
       {
@@ -152,6 +162,49 @@ export function SongForm({ song, backPath, playlistId }: SongFormProps) {
         />
       </div>
 
+      <div className="grid gap-2">
+        <Label>Tag</Label>
+        <div className="flex gap-3 flex-wrap">
+          {Object.values(CreateSongRequestSongTag).map((tag) => (
+            <label
+              key={tag}
+              className="flex items-center gap-1.5 cursor-pointer"
+            >
+              <input
+                type="radio"
+                name="songTag"
+                value={tag}
+                checked={formData.songTag === tag}
+                onChange={() =>
+                  setFormData((prev) => ({ ...prev, songTag: tag }))
+                }
+              />
+              <span className="text-sm">{tag}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div className="grid gap-2">
+        <Label>Country</Label>
+        <div className="flex gap-3 flex-wrap">
+          {Object.values(CreateSongRequestCountry).map((c) => (
+            <label key={c} className="flex items-center gap-1.5 cursor-pointer">
+              <input
+                type="radio"
+                name="country"
+                value={c}
+                checked={formData.country === c}
+                onChange={() =>
+                  setFormData((prev) => ({ ...prev, country: c }))
+                }
+              />
+              <span className="text-sm">{c}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
       <div className="grid grid-cols-2 gap-4">
         <div className="flex items-center gap-3">
           <Input
@@ -197,7 +250,7 @@ export function SongForm({ song, backPath, playlistId }: SongFormProps) {
 
       <div className="flex flex-col items-center py-4">
         <div
-          className="relative aspect-square w-50 rounded-lg shadow-xl flex flex-col items-center justify-between p-4 text-black overflow-hidden"
+          className="relative aspect-square w-50 rounded-lg shadow-xl flex flex-col items-center justify-between p-4 text-white overflow-hidden"
           style={{
             background: `linear-gradient(to bottom, ${formData.gradientColor1}, ${formData.gradientColor2})`,
             fontFamily: "'Kanit', sans-serif",

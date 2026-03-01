@@ -1,6 +1,8 @@
 package org.dariusturcu.backend.util;
 
+import org.dariusturcu.backend.model.song.Country;
 import org.dariusturcu.backend.model.song.Song;
+import org.dariusturcu.backend.model.song.SongTag;
 import org.springframework.stereotype.Component;
 
 import java.awt.*;
@@ -68,6 +70,9 @@ public class CardGenerator {
         graphics2D.setFont(titleFont);
         drawCentered(graphics2D, song.getTitle(), x, y + (int) (size * 0.88), size, 65);
 
+        drawTagTriangle(graphics2D, x, y, size, song);
+        drawCountryFlag(graphics2D, x, y, size, song);
+
         // Border
         graphics2D.setColor(new Color(0, 0, 0, 40));
         graphics2D.drawRect(x, y, size, size);
@@ -106,5 +111,49 @@ public class CardGenerator {
         } catch (Exception e) {
             return Color.WHITE;
         }
+    }
+
+    private static void drawTagTriangle(Graphics2D graphics2D, int x, int y, int size, Song song) {
+        if (song.getSongTag() == null || song.getSongTag() == SongTag.NONE) return;
+
+        Color tagColor;
+        switch (song.getSongTag()) {
+            case SPECIAL -> tagColor = new Color(0, 255, 0);
+            case ANIME -> tagColor = new Color(255, 105, 180);
+            case PLAYLIST -> tagColor = decodeColorSafe(song.getPlaylist().getColor());
+            default -> {
+                return;
+            }
+        }
+
+        int triangleSize = (int) (size * 0.10);
+        int[] xPoints = {x, x + triangleSize, x};
+        int[] yPoints = {y, y, y + triangleSize};
+
+        graphics2D.setColor(tagColor);
+        graphics2D.fillPolygon(xPoints, yPoints, 3);
+    }
+
+    private static void drawCountryFlag(Graphics2D graphics2D, int x, int y, int size, Song song) {
+        if (song.getCountry() == null || song.getCountry() == Country.NONE) return;
+
+        int flagW = (int) (size * 0.10);
+        int flagH = (int) (flagW * 0.6);
+        int flagX = x + size - flagW;
+        int flagY = y + size - flagH;
+
+        switch (song.getCountry()) {
+            case RO -> drawRomanianFlag(graphics2D, flagX, flagY, flagW, flagH);
+        }
+    }
+
+    private static void drawRomanianFlag(Graphics2D graphics2D, int flagX, int flagY, int flagW, int flagH) {
+        int third = flagW / 3;
+        graphics2D.setColor(new Color(0, 43, 127));
+        graphics2D.fillRect(flagX, flagY, third, flagH);
+        graphics2D.setColor(new Color(252, 209, 22));
+        graphics2D.fillRect(flagX + third, flagY, third, flagH);
+        graphics2D.setColor(new Color(206, 17, 38));
+        graphics2D.fillRect(flagX + third * 2, flagY, flagW - third * 2, flagH);
     }
 }

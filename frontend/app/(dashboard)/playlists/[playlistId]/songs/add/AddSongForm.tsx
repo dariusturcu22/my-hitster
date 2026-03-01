@@ -18,6 +18,10 @@ import {
   useCreateSong,
 } from "@/api/generated/playlist-management/playlist-management";
 import { getSongMetadata } from "@/api/generated/song-metadata/song-metadata";
+import {
+  CreateSongRequestCountry,
+  CreateSongRequestSongTag,
+} from "@/api/models";
 
 type Step = "youtube" | "preview" | "details";
 
@@ -27,6 +31,8 @@ interface SongDetails {
   releaseYear: string | number;
   gradientColor1: string;
   gradientColor2: string;
+  songTag: CreateSongRequestSongTag;
+  country: CreateSongRequestCountry;
 }
 
 function extractYoutubeId(input: string): string | null {
@@ -65,6 +71,8 @@ export function AddSongForm({
     releaseYear: "",
     gradientColor1: "#8B5CF6",
     gradientColor2: "#EC4899",
+    songTag: CreateSongRequestSongTag.NONE,
+    country: CreateSongRequestCountry.NONE,
   });
 
   const handleCheckYoutube = () => {
@@ -99,6 +107,8 @@ export function AddSongForm({
         gradientColor2: songData.content?.gradient_color2
           ? `#${songData.content.gradient_color2}`
           : "#EC4899",
+        songTag: CreateSongRequestSongTag.NONE,
+        country: CreateSongRequestCountry.NONE,
       });
       setStep("details");
     } catch {
@@ -142,6 +152,8 @@ export function AddSongForm({
               : formData.releaseYear,
           gradientColor1: formData.gradientColor1.replace("#", ""),
           gradientColor2: formData.gradientColor2.replace("#", ""),
+          songTag: formData.songTag,
+          country: formData.country,
         },
       },
       {
@@ -296,6 +308,52 @@ export function AddSongForm({
             />
           </div>
 
+          <div className="grid gap-2">
+            <Label>Tag</Label>
+            <div className="flex gap-3 flex-wrap">
+              {Object.values(CreateSongRequestSongTag).map((tag) => (
+                <label
+                  key={tag}
+                  className="flex items-center gap-1.5 cursor-pointer"
+                >
+                  <input
+                    type="radio"
+                    name="songTag"
+                    value={tag}
+                    checked={formData.songTag === tag}
+                    onChange={() =>
+                      setFormData((prev) => ({ ...prev, songTag: tag }))
+                    }
+                  />
+                  <span className="text-sm">{tag}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid gap-2">
+            <Label>Country</Label>
+            <div className="flex gap-3 flex-wrap">
+              {Object.values(CreateSongRequestCountry).map((c) => (
+                <label
+                  key={c}
+                  className="flex items-center gap-1.5 cursor-pointer"
+                >
+                  <input
+                    type="radio"
+                    name="country"
+                    value={c}
+                    checked={formData.country === c}
+                    onChange={() =>
+                      setFormData((prev) => ({ ...prev, country: c }))
+                    }
+                  />
+                  <span className="text-sm">{c}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div className="flex items-center gap-3">
               <Input
@@ -341,7 +399,7 @@ export function AddSongForm({
 
           <div className="flex flex-col items-center py-4">
             <div
-              className="relative aspect-square w-50 rounded-lg shadow-xl flex flex-col items-center justify-between p-4 text-black overflow-hidden"
+              className="relative aspect-square w-50 rounded-lg shadow-xl flex flex-col items-center justify-between p-4 text-white overflow-hidden"
               style={{
                 background: `linear-gradient(to bottom, ${formData.gradientColor1}, ${formData.gradientColor2})`,
                 fontFamily: "'Kanit', sans-serif",

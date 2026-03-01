@@ -12,5 +12,4 @@ export type UpdateSongRequestCountry = typeof UpdateSongRequestCountry[keyof typ
 export const UpdateSongRequestCountry = {
   NONE: 'NONE',
   RO: 'RO',
-  GB: 'GB',
 } as const;

@@ -12,5 +12,4 @@ export type SongDTOCountry = typeof SongDTOCountry[keyof typeof SongDTOCountry];
 export const SongDTOCountry = {
   NONE: 'NONE',
   RO: 'RO',
-  GB: 'GB',
 } as const;

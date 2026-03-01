@@ -12,5 +12,4 @@ export type GetCountries200Item = typeof GetCountries200Item[keyof typeof GetCou
 export const GetCountries200Item = {
   NONE: 'NONE',
   RO: 'RO',
-  GB: 'GB',
 } as const;
