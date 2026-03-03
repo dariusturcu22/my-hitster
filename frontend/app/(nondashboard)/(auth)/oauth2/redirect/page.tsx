@@ -1,25 +1,10 @@
-"use client";
+import { Suspense } from "react";
+import OAuth2RedirectHandler from "./RedirectHandler";
 
-import { useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-
-export default function OAuth2RedirectHandler() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
-  useEffect(() => {
-    const error = searchParams.get("error");
-
-    if (error) {
-      router.push("/login?error=" + error);
-    } else {
-      router.push("/playlists");
-    }
-  }, [router, searchParams]);
-
+export default function Page() {
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <p>Processing login... please wait.</p>
-    </div>
+    <Suspense fallback={<div>Loading authentication...</div>}>
+      <OAuth2RedirectHandler />
+    </Suspense>
   );
 }
