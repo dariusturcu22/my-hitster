@@ -63,8 +63,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/shadcn/alert-dialog";
-import { SongDTO } from "@/api/models";
-import { useGetPlaylist } from "@/api/generated/playlist-management/playlist-management";
+import { SongDTO } from "@/hooks/models";
+import { useGetPlaylist } from "@/hooks/generated/playlist-management/playlist-management";
 
 interface SongsDataTableProps {
   data: SongDTO[];

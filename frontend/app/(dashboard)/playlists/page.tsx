@@ -5,7 +5,7 @@ import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/shadcn/sidebar";
 import React from "react";
 
-import { useGetUserPlaylists } from "@/api/generated/user-management/user-management";
+import { useGetUserPlaylists } from "@/hooks/generated/user-management/user-management";
 
 export default function PlaylistPage() {
   const { data: playlists, isLoading, isError, error } = useGetUserPlaylists();

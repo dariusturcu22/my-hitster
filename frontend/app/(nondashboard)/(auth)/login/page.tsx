@@ -17,8 +17,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-import { useLogin } from "@/api/generated/authentication-management/authentication-management";
-import { loginBody } from "@/api/zod/authentication-management/authentication-management";
+import { useLogin } from "@/hooks/generated/authentication-management/authentication-management";
+import { loginBody } from "@/hooks/zod/authentication-management/authentication-management";
 import { useRouter } from "next/navigation";
 
 const LoginFormSchema = loginBody;

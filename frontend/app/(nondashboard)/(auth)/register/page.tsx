@@ -17,8 +17,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-import { useRegister } from "@/api/generated/authentication-management/authentication-management";
-import { registerBody } from "@/api/zod/authentication-management/authentication-management";
+import { useRegister } from "@/hooks/generated/authentication-management/authentication-management";
+import { registerBody } from "@/hooks/zod/authentication-management/authentication-management";
 import { useRouter } from "next/navigation";
 
 const RegisterFormSchema = registerBody

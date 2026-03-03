@@ -9,11 +9,11 @@ import PlaylistContent from "./PlaylistContent";
 import {
   getGetUserPlaylistsQueryKey,
   useGetUserPlaylists,
-} from "@/api/generated/user-management/user-management";
+} from "@/hooks/generated/user-management/user-management";
 import {
   getGetPlaylistQueryKey,
   useUpdatePlaylist,
-} from "@/api/generated/playlist-management/playlist-management";
+} from "@/hooks/generated/playlist-management/playlist-management";
 import { useQueryClient } from "@tanstack/react-query";
 
 interface PageProps {

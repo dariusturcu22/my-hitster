@@ -16,12 +16,12 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   getGetPlaylistQueryKey,
   useCreateSong,
-} from "@/api/generated/playlist-management/playlist-management";
-import { getSongMetadata } from "@/api/generated/song-metadata/song-metadata";
+} from "@/hooks/generated/playlist-management/playlist-management";
+import { getSongMetadata } from "@/hooks/generated/song-metadata/song-metadata";
 import {
   CreateSongRequestCountry,
   CreateSongRequestSongTag,
-} from "@/api/models";
+} from "@/hooks/models";
 
 type Step = "youtube" | "preview" | "details";
 

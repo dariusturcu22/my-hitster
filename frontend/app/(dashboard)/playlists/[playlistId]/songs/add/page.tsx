@@ -7,7 +7,7 @@ import { IconArrowLeft } from "@tabler/icons-react";
 import Link from "next/link";
 import React, { use } from "react";
 import { AddSongForm } from "./AddSongForm";
-import { useGetUserPlaylists } from "@/api/generated/user-management/user-management";
+import { useGetUserPlaylists } from "@/hooks/generated/user-management/user-management";
 
 interface PageProps {
   params: Promise<{ playlistId: string }>;

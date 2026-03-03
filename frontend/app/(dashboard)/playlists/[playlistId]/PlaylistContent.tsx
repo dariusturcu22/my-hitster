@@ -7,11 +7,11 @@ import {
   getGetPlaylistQueryKey,
   useDeleteSong,
   useGetPlaylist,
-} from "@/api/generated/playlist-management/playlist-management";
+} from "@/hooks/generated/playlist-management/playlist-management";
 import {
   getGetUserPlaylistsQueryKey,
   useLeavePlaylist,
-} from "@/api/generated/user-management/user-management";
+} from "@/hooks/generated/user-management/user-management";
 
 interface PlaylistContentProps {
   playlistId: number;

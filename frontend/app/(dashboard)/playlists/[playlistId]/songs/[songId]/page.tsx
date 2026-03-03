@@ -8,8 +8,8 @@ import { IconArrowLeft } from "@tabler/icons-react";
 import Link from "next/link";
 import React, { use } from "react";
 import { SongForm } from "./SongForm";
-import { useGetSong } from "@/api/generated/playlist-management/playlist-management";
-import { useGetUserPlaylists } from "@/api/generated/user-management/user-management";
+import { useGetSong } from "@/hooks/generated/playlist-management/playlist-management";
+import { useGetUserPlaylists } from "@/hooks/generated/user-management/user-management";
 
 interface PageProps {
   params: Promise<{ playlistId: string; songId: string }>;

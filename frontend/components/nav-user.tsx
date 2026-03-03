@@ -30,9 +30,9 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/shadcn/sidebar";
-import { useLogout } from "@/api/generated/authentication-management/authentication-management";
+import { useLogout } from "@/hooks/generated/authentication-management/authentication-management";
 import { useRouter } from "next/navigation";
-import { useGetCurrentUser } from "@/api/generated/user-management/user-management";
+import { useGetCurrentUser } from "@/hooks/generated/user-management/user-management";
 
 export function NavUser() {
   const [mounted, setMounted] = React.useState(false);

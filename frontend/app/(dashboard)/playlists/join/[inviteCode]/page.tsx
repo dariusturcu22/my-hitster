@@ -3,7 +3,7 @@
 import {
   getGetUserPlaylistsQueryKey,
   useJoinPlaylist,
-} from "@/api/generated/user-management/user-management";
+} from "@/hooks/generated/user-management/user-management";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import React, { use } from "react";

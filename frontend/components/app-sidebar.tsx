@@ -22,13 +22,13 @@ import {
 import { Input } from "@/components/shadcn/input";
 import { Button } from "@/components/shadcn/button";
 
-import { PlaylistSummaryDTO } from "@/api/models";
+import { PlaylistSummaryDTO } from "@/hooks/models";
 
 import {
   useCreatePlaylist,
   useJoinPlaylist,
   getGetUserPlaylistsQueryKey,
-} from "@/api/generated/user-management/user-management";
+} from "@/hooks/generated/user-management/user-management";
 import { useQueryClient } from "@tanstack/react-query";
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {

@@ -10,14 +10,14 @@ import {
   CreateSongRequestCountry,
   CreateSongRequestSongTag,
   SongDTO,
-} from "@/api/models";
+} from "@/hooks/models";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   getGetPlaylistQueryKey,
   getGetSongQueryKey,
   useUpdateSong,
-} from "@/api/generated/playlist-management/playlist-management";
+} from "@/hooks/generated/playlist-management/playlist-management";
 
 interface SongFormProps {
   song: SongDTO;
