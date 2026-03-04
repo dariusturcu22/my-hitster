@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
-        source: "/api/:path*",
+        source: "/backend/:path*",
         destination: "https://backend-weathered-grass-688.fly.dev/:path*",
       },
     ];
