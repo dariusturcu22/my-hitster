@@ -25,8 +25,8 @@ public class CookieUtil {
         return ResponseCookie.from(name, token)
                 .httpOnly(true)
                 .secure(isProduction)
-                .sameSite(isProduction? "None" : "Strict")
-                .path(path)
+                .sameSite(isProduction ? "None" : "Strict")
+                .path(path + (isProduction ? "; Partitioned" : ""))
                 .maxAge(maxAgeSeconds)
                 .build();
     }
