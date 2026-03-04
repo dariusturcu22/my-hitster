@@ -46,6 +46,8 @@ export function AppSidebar({
   currentPlaylistId,
   ...props
 }: AppSidebarProps) {
+  playlists = Array.isArray(playlists) ? playlists : [];
+
   const Logo = application.logo;
   const { state } = useSidebar();
   const router = useRouter();
