@@ -26,7 +26,8 @@ public class CookieUtil {
                 .httpOnly(true)
                 .secure(isProduction)
                 .sameSite(isProduction ? "None" : "Strict")
-                .path(path + (isProduction ? "; Partitioned" : ""))
+                .path(path)
+                .partitioned(isProduction)
                 .maxAge(maxAgeSeconds)
                 .build();
     }
