@@ -85,7 +85,7 @@ export default function RegisterPage() {
             <div className="mt-6">
               <Button type="button" variant="outline" className="w-full">
                 <a
-                  href="http://localhost:8080/oauth2/authorization/google"
+                  href={`${process.env.NEXT_PUBLIC_API_URL}/oauth2/authorization/google`}
                   className="flex items-center gap-2"
                 >
                   <svg
