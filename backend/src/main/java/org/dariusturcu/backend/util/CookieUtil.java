@@ -2,6 +2,7 @@ package org.dariusturcu.backend.util;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 
@@ -10,17 +11,21 @@ import java.util.Optional;
 
 @Component
 public class CookieUtil {
+    @Value("${app.env}")
+    private String appEnv;
+
+
     public ResponseCookie createCookie(
             String token,
             long maxAgeSeconds,
             String name,
             String path
     ) {
+        boolean isProduction = appEnv.equals("prod");
         return ResponseCookie.from(name, token)
                 .httpOnly(true)
-                // .secure(true) // production
-                .secure(false) // development
-                .sameSite("Strict")
+                .secure(isProduction)
+                .sameSite(isProduction? "None" : "Strict")
                 .path(path)
                 .maxAge(maxAgeSeconds)
                 .build();
