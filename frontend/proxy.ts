@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const PUBLIC_ROUTES = ["/login", "/register", "/oauth2/redirect", "/landing"];
+const PUBLIC_ROUTES = [
+  "/login",
+  "/register",
+  "/oauth2/redirect",
+  "/landing",
+  "/backend",
+];
 
 export default function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
