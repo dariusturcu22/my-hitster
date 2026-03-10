@@ -1,6 +1,6 @@
 # My Hitster
 
-(my-hitster.dariusturcu22.com)[My Hitster] is a full-stack application designed to generate AI-assisted game cards based on music tracks.  
+[My Hitster](my-hitster.dariusturcu22.com) is a full-stack application designed to generate AI-assisted game cards based on music tracks.  
 It combines structured metadata retrieval with LLM-based enrichment to produce detailed, playable content from YouTube links.
 
 The project is structured as a monorepo containing:
