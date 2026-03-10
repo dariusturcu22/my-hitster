@@ -185,15 +185,36 @@ export function DataTable({
     {
       id: "actions",
       cell: ({ row }) => (
-        <Button
-          variant="ghost"
-          size="icon"
-          className="text-destructive hover:text-destructive hover:bg-destructive/10"
-          onClick={() => onDelete?.(row.original.id)}
-        >
-          <IconTrash className="size-4" />
-          <span className="sr-only">Delete song</span>
-        </Button>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+            >
+              <IconTrash className="size-4" />
+              <span className="sr-only">Delete song</span>
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete song?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will permanently remove "{row.original.title}" from the
+                playlist.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onClick={() => onDelete?.(row.original.id)}
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       ),
     },
   ];
