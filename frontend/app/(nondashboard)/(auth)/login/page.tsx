@@ -71,11 +71,11 @@ export default function LoginPage() {
             </div>
 
             <div className="mt-6">
-              <Button type="button" variant="outline" className="w-full">
-                <a
-                  href={`${process.env.NEXT_PUBLIC_API_URL}/oauth2/authorization/google`}
-                  className="flex items-center gap-2"
-                >
+              <a
+                href={`${process.env.NEXT_PUBLIC_API_URL}/oauth2/authorization/google`}
+                className="flex items-center gap-2"
+              >
+                <Button type="button" variant="outline" className="w-full">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="0.98em"
@@ -100,8 +100,8 @@ export default function LoginPage() {
                     />
                   </svg>
                   <span>Continue with Google</span>
-                </a>
-              </Button>
+                </Button>
+              </a>
             </div>
 
             <div className="my-6 grid grid-cols-[1fr_auto_1fr] items-center gap-3">

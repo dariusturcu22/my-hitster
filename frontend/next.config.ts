@@ -7,6 +7,10 @@ const nextConfig: NextConfig = {
         source: "/backend/:path*",
         destination: "https://api.dariusturcu22.com/:path*",
       },
+      {
+        source: "/login/oauth2/:path*",
+        destination: "https://api.dariusturcu22.com/login/oauth2/:path*",
+      },
     ];
   },
 };
