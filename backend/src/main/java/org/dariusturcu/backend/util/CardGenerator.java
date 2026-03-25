@@ -56,11 +56,11 @@ public class CardGenerator {
         Font yearFont = new Font(fontName, Font.BOLD, 250);
         Font titleFont = new Font(fontName, Font.ITALIC, 55);
 
-        int padding = 75;
+        int padding = 67;
 
         // Artist
         graphics2D.setFont(artistFont);
-        drawCentered(graphics2D, song.getArtist(), x + padding, y + (int) (size * 0.18), size - padding * 2, 70);
+        drawCentered(graphics2D, song.getArtist(), x + padding, y + (int) (size * 0.22), size - padding * 2, 70);
 
         // Year
         graphics2D.setFont(yearFont);
