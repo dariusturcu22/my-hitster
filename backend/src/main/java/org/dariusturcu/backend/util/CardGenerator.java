@@ -52,23 +52,25 @@ public class CardGenerator {
         graphics2D.setColor(Color.WHITE);
         String fontName = "Kanit";
 
-        Font artistFont = new Font(fontName, Font.PLAIN, 60);
+        Font artistFont = new Font(fontName, Font.PLAIN, 55);
         Font yearFont = new Font(fontName, Font.BOLD, 250);
         Font titleFont = new Font(fontName, Font.ITALIC, 55);
 
+        int padding = 50;
+
         // Artist
         graphics2D.setFont(artistFont);
-        drawCentered(graphics2D, song.getArtist(), x, y + (int) (size * 0.18), size, 70);
+        drawCentered(graphics2D, song.getArtist(), x + padding, y + (int) (size * 0.18), size - padding * 2, 70);
 
         // Year
         graphics2D.setFont(yearFont);
         FontMetrics yearMetrics = graphics2D.getFontMetrics(yearFont);
         int yearY = y + (size / 2) + (yearMetrics.getAscent() / 3);
-        drawCentered(graphics2D, String.valueOf(song.getReleaseYear()), x, yearY, size, 50);
+        drawCentered(graphics2D, String.valueOf(song.getReleaseYear()), x + padding, yearY, size - padding * 2, 50);
 
         // Title
         graphics2D.setFont(titleFont);
-        drawCentered(graphics2D, song.getTitle(), x, y + (int) (size * 0.88), size, 65);
+        drawCentered(graphics2D, song.getTitle(), x + padding, y + (int) (size * 0.88), size - padding * 2, 65);
 
         drawTagTriangle(graphics2D, x, y, size, song);
         drawCountryFlag(graphics2D, x, y, size, song);
