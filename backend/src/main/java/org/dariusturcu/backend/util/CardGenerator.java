@@ -56,7 +56,7 @@ public class CardGenerator {
         Font yearFont = new Font(fontName, Font.BOLD, 250);
         Font titleFont = new Font(fontName, Font.ITALIC, 55);
 
-        int padding = 50;
+        int padding = 75;
 
         // Artist
         graphics2D.setFont(artistFont);
