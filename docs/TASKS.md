@@ -420,17 +420,17 @@ Handoff item 2. Its own branch, separate from the metadata-source spike, per the
 
 Survey complete, verified against each provider's own official docs across three research passes. Shortlist, all confirmed with a hard structured-output guarantee (constrained decoding or strict JSON-schema mode, not best-effort JSON):
 
-- Zhipu/Z.ai GLM-4.5-Flash and GLM-4.7-Flash, free indefinitely
-- Groq gpt-oss-20b and gpt-oss-120b, real recurring free tier (30 RPM / 1,000 RPD / 8,000 TPM / 200,000 TPD), cheap paid overflow beyond that
-- DeepInfra Llama-3.1-8B-Instruct-Turbo, cheapest confirmed paid hosted option
-- AWS Bedrock Nova Micro, hard guarantee GA
-- llama.cpp run locally on the laptop's Arc iGPU, 7-8B class model, zero marginal cost, see `hardware-local-llm` in project memory for why the laptop and not the desktop
+- ~~Zhipu/Z.ai GLM-4.5-Flash~~, dropped: confirmed live against the real API that it does not honor structured output despite the docs claiming JSON-schema support, see `ai/spikes/README.md` for the two failed reproductions. GLM-4.7-Flash not yet retested, may not share the same behavior.
+- Groq gpt-oss-20b and gpt-oss-120b, real recurring free tier (30 RPM / 1,000 RPD / 8,000 TPM / 200,000 TPD), cheap paid overflow beyond that. Live-confirmed: structured output holds.
+- DeepInfra Llama-3.1-8B-Instruct-Turbo, cheapest confirmed paid hosted option. Client written, blocked on a `402` from DeepInfra requiring a positive account balance, not yet live-tested.
+- AWS Bedrock Nova Micro, hard guarantee GA. Live-confirmed: structured output holds via forced tool use (Bedrock's Converse API has no OpenAI-style `response_format`).
+- llama.cpp run locally on the laptop's Arc iGPU, 7-8B class model, zero marginal cost, see `hardware-local-llm` in project memory for why the laptop and not the desktop. Not started.
 
-OpenAI's own cheap tier (`gpt-5-nano`, `gpt-5-mini`) and the existing `gpt-5.1` production baseline stay in as benchmarks, not shortlist candidates, since every option above already beats `gpt-5-nano` on price. They exist to answer "how much accuracy, if any, does the cheap/free tier give up."
+OpenAI's own cheap tier (`gpt-5-nano`, `gpt-5-mini`) and the existing `gpt-5.1` production baseline stay in as benchmarks, not shortlist candidates, since every option above already beats `gpt-5-nano` on price. They exist to answer "how much accuracy, if any, does the cheap/free tier give up." Both live-confirmed: structured output holds (`gpt-5-nano` rejects a non-default `temperature`, handled in the client, otherwise no surprises).
 
 - [x] Survey current free/cheap hosted-API options and open-weight models runnable locally, for which ones support Pydantic-compatible structured output
 - [x] Narrow to a shortlist of candidates that plausibly clear the structured-output bar
-- [ ] Set up a client for each shortlisted candidate (Zhipu, Groq, DeepInfra, AWS Bedrock accounts/API keys; llama.cpp local install) in `ai/spikes/`, no production code
+- [x] Set up a client for each shortlisted candidate in `ai/spikes/` (`openai_compatible_spike.py` covers OpenAI, Zhipu, Groq, DeepInfra; `bedrock_spike.py` covers Nova Micro), no production code. llama.cpp's local install still pending.
 - [ ] Expand the test set with adversarial cases, not just the agreement-heavy set already used in the metadata-source spike: songs where MusicBrainz/Discogs/Wikidata disagree on release year, songs where only one source has any match at all, and titles/artists genuinely ambiguous to extract (typo'd or malformed submissions, non-Latin script, multiple distinct works sharing a title)
 - [ ] Test each shortlisted candidate plus the OpenAI benchmarks against both the existing and expanded test sets, on two dimensions: picking the correct release year out of conflicting/partial source data, and extracting the correct title/artist from an uncertain or malformed submission
 - [ ] Decide whether any shortlisted candidate is worth defaulting bulk imports (story 19) to, or whether OpenAI remains the only option for now
