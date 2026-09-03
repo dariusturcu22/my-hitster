@@ -8,6 +8,9 @@
 # --- Local tooling overrides ---
 Makefile.local
 
+# --- Local LLM binaries and model weights (story 20 spike) ---
+ai/local-llm/
+
 # --- Environment Secrets ---
 .env
 .env.local
