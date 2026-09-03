@@ -26,14 +26,20 @@ PROVIDERS: dict[str, dict[str, str | None]] = {
     "zhipu": {"base_url": "https://api.z.ai/api/paas/v4/", "api_key_env": "ZHIPU_API_KEY"},
     "groq": {"base_url": "https://api.groq.com/openai/v1", "api_key_env": "GROQ_API_KEY"},
     "deepinfra": {"base_url": "https://api.deepinfra.com/v1/openai", "api_key_env": "DEEPINFRA_API_KEY"},
+    # llama-server (ai/local-llm/) takes no API key; any non-empty string satisfies the SDK.
+    "llamacpp": {"base_url": "http://127.0.0.1:8090/v1", "api_key_env": None},
 }
+LLAMACPP_PLACEHOLDER_API_KEY = "not-needed"
 
 
 def build_client(provider: str) -> OpenAI:
     config = PROVIDERS[provider]
-    api_key = _env.get(config["api_key_env"])
-    if not api_key:
-        raise ValueError(f"{config['api_key_env']} is not set in ai/.env")
+    if config["api_key_env"] is None:
+        api_key = LLAMACPP_PLACEHOLDER_API_KEY
+    else:
+        api_key = _env.get(config["api_key_env"])
+        if not api_key:
+            raise ValueError(f"{config['api_key_env']} is not set in ai/.env")
     return OpenAI(api_key=api_key, base_url=config["base_url"])
 
 

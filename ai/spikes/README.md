@@ -40,6 +40,27 @@ Micro gets its own script using forced tool use instead:
 .venv/Scripts/python.exe spikes/bedrock_spike.py "Roygbiv" "Boards of Canada"
 ```
 
+llama.cpp runs as `llama-server.exe` (`ai/local-llm/bin/`, gitignored, the
+Vulkan-backend Windows build) serving an OpenAI-compatible endpoint on
+`localhost:8090`, so it reuses `openai_compatible_spike.py` with the
+`llamacpp` provider, no API key needed:
+
+```
+ai/local-llm/bin/llama-server.exe -m ../models/Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf --port 8090 -ngl 99 --jinja -c 4096
+.venv/Scripts/python.exe spikes/openai_compatible_spike.py llamacpp Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf "Roygbiv" "Boards of Canada"
+```
+
+**Confirmed running on CPU, not the laptop's Arc iGPU**, despite `-ngl 99`.
+`~10 tokens/sec` generation, no Vulkan device ever appears in the server
+log. Checked directly: the Vulkan loader (`vulkan-1.dll`) is present, but
+`HKLM\SOFTWARE\Khronos\Vulkan\Drivers` (where a working GPU driver
+registers its Vulkan ICD) has no entries at all, on either the 64-bit or
+WOW6432Node registry path, despite a November 2025 Arc Graphics driver
+being installed. The GPU driver itself isn't exposing Vulkan to the system;
+needs a driver update or repair from Intel directly to get GPU offload
+working. Structured output itself is confirmed correct on CPU already, this
+only affects throughput, not whether the candidate clears the bar.
+
 Needs `ZHIPU_API_KEY`, `GROQ_API_KEY`, `DEEPINFRA_API_KEY`, and
 `AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY`/`AWS_REGION` in `ai/.env`.
 
