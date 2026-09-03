@@ -25,7 +25,8 @@ Wikidata need no key.
 Same throwaway-script treatment, testing each shortlisted candidate against
 the shared `LlmExtractionResult` schema (`llm_schemas.py`) so results are
 comparable. `openai_compatible_spike.py` covers every candidate that exposes
-an OpenAI-compatible endpoint (OpenAI itself, Zhipu, Groq, DeepInfra):
+an OpenAI-compatible endpoint (OpenAI itself, Groq, DeepInfra; the `zhipu`
+provider config is still there but unused, see below):
 
 ```
 .venv/Scripts/python.exe spikes/openai_compatible_spike.py openai gpt-5-nano "Roygbiv" "Boards of Canada"
@@ -61,16 +62,25 @@ needs a driver update or repair from Intel directly to get GPU offload
 working. Structured output itself is confirmed correct on CPU already, this
 only affects throughput, not whether the candidate clears the bar.
 
-Needs `ZHIPU_API_KEY`, `GROQ_API_KEY`, `DEEPINFRA_API_KEY`, and
+Needs `GROQ_API_KEY`, `DEEPINFRA_API_KEY`, and
 `AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY`/`AWS_REGION` in `ai/.env`.
 
-**Zhipu GLM-4.5-Flash confirmed NOT to clear the structured-output bar**,
-despite Z.ai's own docs claiming JSON-schema support. Tested twice against
-the live API: `response_format: {"type": "json_schema", ...}` is silently
-ignored, the model free-writes prose with a markdown-fenced JSON block
-instead (wrong field names included); forced tool-calling produces
-corrupted output (a malformed float literal, a leaked `</tool_call>` tag
-inside the arguments string). Both are the "best-effort JSON" failure mode
-`CLAUDE.md`'s rule against regex-parsing exists to catch, not the hard
-guarantee the docs describe. Dropped from the shortlist pending a retest of
-GLM-4.7-Flash specifically, which may not share the same behavior.
+**Zhipu dropped entirely, on two independent grounds, both checked directly
+rather than assumed.** Free tier: GLM-4.5-Flash and GLM-4.7-Flash both
+tested, neither clears the structured-output bar despite Z.ai's own docs
+claiming JSON-schema support. `response_format: {"type": "json_schema",
+...}` is silently ignored on both models, the model free-writes prose with
+a markdown-fenced JSON block instead (wrong field names included).
+GLM-4.5-Flash's forced tool-calling produces corrupted output (a malformed
+float literal, a leaked `</tool_call>` tag inside the arguments string);
+GLM-4.7-Flash's forced tool-calling instead hung indefinitely with no
+response at all, two different failure modes on the same mechanism. Both
+are the "best-effort JSON" failure mode `CLAUDE.md`'s rule against
+regex-parsing exists to catch. Paid tier: GLM-5.3-Flash, the newest and
+cheapest paid option, isn't price-competitive regardless, its list price
+($0.15/$0.50 per million) and promo price ($0.075/$0.25 through
+2026-09-09) both cost more on input than `gpt-5-nano`'s $0.05, which is
+already confirmed working. `ZHIPU_API_KEY` stays in `ai/.env` and the
+`zhipu` provider config stays in `openai_compatible_spike.py` in case a
+future model is worth a fresh look, but nothing currently in the catalog
+is both cheaper and functional.

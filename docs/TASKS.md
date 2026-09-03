@@ -420,7 +420,7 @@ Handoff item 2. Its own branch, separate from the metadata-source spike, per the
 
 Survey complete, verified against each provider's own official docs across three research passes. Shortlist, all confirmed with a hard structured-output guarantee (constrained decoding or strict JSON-schema mode, not best-effort JSON):
 
-- ~~Zhipu/Z.ai GLM-4.5-Flash~~, dropped: confirmed live against the real API that it does not honor structured output despite the docs claiming JSON-schema support, see `ai/spikes/README.md` for the two failed reproductions. GLM-4.7-Flash not yet retested, may not share the same behavior.
+- ~~Zhipu/Z.ai~~, dropped on two independent grounds. Free tier (GLM-4.5-Flash and GLM-4.7-Flash both tested): confirmed live that structured output doesn't hold, `response_format` with a JSON schema is silently ignored in favor of markdown-fenced prose, and forced tool-calling on GLM-4.7-Flash hung indefinitely rather than responding at all, see `ai/spikes/README.md`. Paid tier (GLM-5.3-Flash, the newest and cheapest paid option): not price-competitive even before testing whether it works, its list price ($0.15/$0.50 per million) and promo price ($0.075/$0.25 through 2026-09-09) both cost more on input than `gpt-5-nano`'s $0.05, which is already confirmed working. No remaining Zhipu tier is both cheaper and functional.
 - Groq gpt-oss-20b and gpt-oss-120b, real recurring free tier (30 RPM / 1,000 RPD / 8,000 TPM / 200,000 TPD), cheap paid overflow beyond that. Live-confirmed: structured output holds.
 - DeepInfra Llama-3.1-8B-Instruct-Turbo, cheapest confirmed paid hosted option. Client written, blocked on a `402` from DeepInfra requiring a positive account balance, not yet live-tested.
 - AWS Bedrock Nova Micro, hard guarantee GA. Live-confirmed: structured output holds via forced tool use (Bedrock's Converse API has no OpenAI-style `response_format`).
@@ -430,7 +430,7 @@ OpenAI's own cheap tier (`gpt-5-nano`, `gpt-5-mini`) and the existing `gpt-5.1` 
 
 - [x] Survey current free/cheap hosted-API options and open-weight models runnable locally, for which ones support Pydantic-compatible structured output
 - [x] Narrow to a shortlist of candidates that plausibly clear the structured-output bar
-- [x] Set up a client for each shortlisted candidate in `ai/spikes/` (`openai_compatible_spike.py` covers OpenAI, Zhipu, Groq, DeepInfra, and llama.cpp; `bedrock_spike.py` covers Nova Micro), no production code
+- [x] Set up a client for each shortlisted candidate in `ai/spikes/` (`openai_compatible_spike.py` covers OpenAI, Groq, DeepInfra, and llama.cpp, and kept the now-unused Zhipu config for reference; `bedrock_spike.py` covers Nova Micro), no production code
 - [ ] Expand the test set with adversarial cases, not just the agreement-heavy set already used in the metadata-source spike: songs where MusicBrainz/Discogs/Wikidata disagree on release year, songs where only one source has any match at all, and titles/artists genuinely ambiguous to extract (typo'd or malformed submissions, non-Latin script, multiple distinct works sharing a title)
 - [ ] Test each shortlisted candidate plus the OpenAI benchmarks against both the existing and expanded test sets, on two dimensions: picking the correct release year out of conflicting/partial source data, and extracting the correct title/artist from an uncertain or malformed submission
 - [ ] Decide whether any shortlisted candidate is worth defaulting bulk imports (story 19) to, or whether OpenAI remains the only option for now
