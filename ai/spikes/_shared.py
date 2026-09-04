@@ -5,13 +5,19 @@ import httpx
 
 USER_AGENT = "hittiguess/0.1 (+https://hittiguess.com; contact@hittiguess.com)"
 
-MUSICBRAINZ_DELAY_SECONDS = 2.5  # documented hard limit is 1 request/second; padded well above it
-DISCOGS_DELAY_SECONDS = 1.1  # well under the 60/minute authenticated limit
-# Wikidata's published limit for anonymous requests with no identifying characteristics
-# is 10/minute (a descriptive User-Agent may or may not move a script into the more
-# lenient 200/minute browser-identified tier, not confirmed either way), so pace to the
-# stricter number rather than assume the better one applies.
-WIKIDATA_DELAY_SECONDS = 6.5
+RATE_LIMIT_TARGET_UTILIZATION = 0.75  # stay comfortably inside each source's documented ceiling, not at its edge
+
+MUSICBRAINZ_DELAY_SECONDS = 1.35  # documented hard limit is 1 req/sec; 1.35s paces to ~74% of that
+# Confirmed against mediawiki.org/wiki/Wikimedia_APIs/Rate_limits: 10/min applies to
+# requests with no identifying characteristics beyond IP, which is what an anonymous
+# script is, the 200/min tier is specifically for browser-based traffic, not just a
+# script with a descriptive User-Agent. 8.0s paces to exactly 75% of the 10/min ceiling.
+# A Wikimedia bot-password account unlocks 200/min (any logged-in account, no approval
+# needed) or 2,000/min (established editors), see ai/spikes/README.md.
+WIKIDATA_DELAY_SECONDS = 8.0
+# Discogs paces itself dynamically off the real X-Discogs-Ratelimit-* response headers
+# (see discogs_spike.py's DiscogsRateLimiter) rather than a fixed delay, since Discogs
+# is the one source that actually tells you your live quota usage.
 
 DEFAULT_MAX_RETRIES = 4
 DEFAULT_BASE_DELAY_SECONDS = 5.0

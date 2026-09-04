@@ -17,14 +17,7 @@ from dotenv import dotenv_values
 import discogs_spike
 import musicbrainz_spike
 import wikidata_spike
-from _shared import (
-    DISCOGS_DELAY_SECONDS,
-    MUSICBRAINZ_DELAY_SECONDS,
-    USER_AGENT,
-    WIKIDATA_DELAY_SECONDS,
-    extract_year,
-    get_with_backoff,
-)
+from _shared import MUSICBRAINZ_DELAY_SECONDS, USER_AGENT, WIKIDATA_DELAY_SECONDS, extract_year, get_with_backoff
 
 _env = dotenv_values(Path(__file__).resolve().parent.parent / ".env")
 
@@ -81,9 +74,6 @@ def check_musicbrainz(title: str, artist: str) -> int | None:
 
 
 def check_discogs(title: str, artist: str) -> int | None:
-    import time
-
-    time.sleep(DISCOGS_DELAY_SECONDS)
     results = discogs_spike.search_release(title, artist)
     releases = results.get("results", [])
     if not releases:
@@ -94,7 +84,6 @@ def check_discogs(title: str, artist: str) -> int | None:
 
     master_years = []
     for master_id in master_ids:
-        time.sleep(DISCOGS_DELAY_SECONDS)
         year = discogs_spike.master_year(discogs_spike.get_master(master_id))
         if year is not None:
             master_years.append(year)

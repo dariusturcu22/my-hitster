@@ -10,13 +10,7 @@ import time
 import discogs_spike
 import musicbrainz_spike
 import wikidata_spike
-from _shared import (
-    DISCOGS_DELAY_SECONDS,
-    MUSICBRAINZ_DELAY_SECONDS,
-    RETRY_EVENT_COUNTS,
-    WIKIDATA_DELAY_SECONDS,
-    extract_year,
-)
+from _shared import MUSICBRAINZ_DELAY_SECONDS, RETRY_EVENT_COUNTS, WIKIDATA_DELAY_SECONDS, extract_year
 
 # (title, artist, album, tier, note) - album is None when there's no separate
 # album to compare against, or when guessing the title risks being wrong
@@ -137,7 +131,6 @@ def _discogs_lookup(title: str, artist: str, label: str) -> int | None:
 
     master_years = []
     for master_id in master_ids:
-        time.sleep(DISCOGS_DELAY_SECONDS)
         master = discogs_spike.get_master(master_id)
         year = discogs_spike.master_year(master)
         print(f"  Discogs ({label}) master {master_id}: year={year} title={master.get('title')!r}")
@@ -150,12 +143,10 @@ def _discogs_lookup(title: str, artist: str, label: str) -> int | None:
 
 
 def run_discogs(title: str, artist: str, album: str | None) -> None:
-    time.sleep(DISCOGS_DELAY_SECONDS)
     track_year = _discogs_lookup(title, artist, "track")
 
     album_year = None
     if album:
-        time.sleep(DISCOGS_DELAY_SECONDS)
         album_year = _discogs_lookup(album, artist, "album")
         if album_year and track_year:
             agreement = "agrees" if album_year == track_year else "DIFFERS"
