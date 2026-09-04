@@ -10,7 +10,7 @@ import time
 import discogs_spike
 import musicbrainz_spike
 import wikidata_spike
-from _shared import MUSICBRAINZ_DELAY_SECONDS, RETRY_EVENT_COUNTS, extract_year
+from _shared import MUSICBRAINZ_DELAY_SECONDS, RETRY_EVENT_COUNTS, extract_year, response_time_summary
 
 # (title, artist, album, tier, note) - album is None when there's no separate
 # album to compare against, or when guessing the title risks being wrong
@@ -258,8 +258,15 @@ if __name__ == "__main__":
     print("\n=== Run stats ===")
     print(f"Total wall-clock time: {total_seconds:.1f}s for {len(SONGS)} songs ({total_seconds / len(SONGS):.1f}s/song average)")
     for source_name, seconds_spent in source_seconds.items():
-        print(f"  {source_name}: {seconds_spent:.1f}s total, {seconds_spent / len(SONGS):.1f}s/song average")
+        print(f"  {source_name}: {seconds_spent:.1f}s total, {seconds_spent / len(SONGS):.1f}s/song average (wall time: pacing sleep + retries + actual response)")
     if RETRY_EVENT_COUNTS:
         print(f"Retry/backoff events: {dict(RETRY_EVENT_COUNTS)}")
     else:
         print("Retry/backoff events: none")
+
+    print("\n=== Pure response latency (excludes pacing sleep and retry backoff) ===")
+    for host, stats in response_time_summary().items():
+        print(
+            f"  {host}: {stats['count']} calls, avg {stats['average_seconds']:.2f}s, "
+            f"min {stats['min_seconds']:.2f}s, max {stats['max_seconds']:.2f}s"
+        )

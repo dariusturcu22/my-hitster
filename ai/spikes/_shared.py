@@ -1,5 +1,6 @@
 import sys
 import time
+from urllib.parse import urlparse
 
 import httpx
 
@@ -30,6 +31,11 @@ sys.stdout.reconfigure(encoding="utf-8", line_buffering=True)
 # outcome, so a request that succeeds on its 3rd attempt still counts 2 retries.
 RETRY_EVENT_COUNTS: dict[str, int] = {}
 
+# Keyed by hostname, one sample per successful response, measuring only the
+# actual request/response round trip, not our own pacing sleep beforehand
+# or any retry backoff wait, those are separate costs, not API latency.
+RESPONSE_TIME_SAMPLES: dict[str, list[float]] = {}
+
 
 def get_with_backoff(url: str, *, params: dict | None = None, headers: dict | None = None,
                       client: httpx.Client | None = None,
@@ -41,10 +47,13 @@ def get_with_backoff(url: str, *, params: dict | None = None, headers: dict | No
     holding an authenticated login session's cookies) to reuse it instead
     of a one-off anonymous request."""
     requester = client.get if client is not None else httpx.get
+    host = urlparse(url).hostname or url
     last_transport_error: httpx.TransportError | None = None
     for attempt_number in range(max_retries):
         try:
+            request_started_at = time.perf_counter()
             response = requester(url, params=params, headers=headers, timeout=REQUEST_TIMEOUT_SECONDS)
+            request_elapsed_seconds = time.perf_counter() - request_started_at
         except httpx.TransportError as transport_error:
             last_transport_error = transport_error
             wait_seconds = base_delay_seconds * (BACKOFF_MULTIPLIER**attempt_number)
@@ -72,12 +81,28 @@ def get_with_backoff(url: str, *, params: dict | None = None, headers: dict | No
             time.sleep(wait_seconds)
             continue
         response.raise_for_status()
+        RESPONSE_TIME_SAMPLES.setdefault(host, []).append(request_elapsed_seconds)
         return response
 
     if last_transport_error is not None:
         raise last_transport_error
     response.raise_for_status()
     return response
+
+
+def response_time_summary() -> dict[str, dict[str, float]]:
+    """Per-host average/min/max/count of pure request/response latency,
+    excluding pacing sleep and retry backoff, for reporting alongside the
+    per-song wall-clock timing, which includes both."""
+    summary = {}
+    for host, samples in RESPONSE_TIME_SAMPLES.items():
+        summary[host] = {
+            "count": len(samples),
+            "average_seconds": sum(samples) / len(samples),
+            "min_seconds": min(samples),
+            "max_seconds": max(samples),
+        }
+    return summary
 
 
 def extract_year(date_str: str | None) -> int | None:
