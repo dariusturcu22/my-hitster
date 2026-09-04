@@ -10,7 +10,7 @@ import time
 import discogs_spike
 import musicbrainz_spike
 import wikidata_spike
-from _shared import MUSICBRAINZ_DELAY_SECONDS, RETRY_EVENT_COUNTS, extract_year, response_time_summary
+from _shared import RETRY_EVENT_COUNTS, extract_year, response_time_summary
 
 # (title, artist, album, tier, note) - album is None when there's no separate
 # album to compare against, or when guessing the title risks being wrong
@@ -60,7 +60,6 @@ SONGS = [
 
 
 def run_musicbrainz(title: str, artist: str, album: str | None) -> None:
-    time.sleep(MUSICBRAINZ_DELAY_SECONDS)
     data = musicbrainz_spike.search_release_group(title, artist)
     groups = data.get("release-groups", [])
     track_date = None
@@ -78,7 +77,6 @@ def run_musicbrainz(title: str, artist: str, album: str | None) -> None:
         primary_artist_credit = artist_credit[0] if artist_credit else None
         artist_id = primary_artist_credit.get("artist", {}).get("id") if primary_artist_credit else None
         if artist_id:
-            time.sleep(MUSICBRAINZ_DELAY_SECONDS)
             artist_data = musicbrainz_spike.get_artist(artist_id)
             area = (artist_data.get("area") or {}).get("name")
             country = artist_data.get("country")
@@ -86,7 +84,6 @@ def run_musicbrainz(title: str, artist: str, album: str | None) -> None:
 
     album_date = None
     if album:
-        time.sleep(MUSICBRAINZ_DELAY_SECONDS)
         album_data = musicbrainz_spike.search_release_group(album, artist)
         album_groups = album_data.get("release-groups", [])
         if not album_groups:

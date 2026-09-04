@@ -18,7 +18,7 @@ import discogs_spike
 import musicbrainz_spike
 import wikidata_spike
 import youtube_quota
-from _shared import MUSICBRAINZ_DELAY_SECONDS, USER_AGENT, extract_year, get_with_backoff
+from _shared import USER_AGENT, extract_year, get_with_backoff
 
 _env = dotenv_values(Path(__file__).resolve().parent.parent / ".env")
 
@@ -65,9 +65,6 @@ def extract_youtube_released_on(description: str | None) -> int | None:
 
 
 def check_musicbrainz(title: str, artist: str) -> int | None:
-    import time
-
-    time.sleep(MUSICBRAINZ_DELAY_SECONDS)
     data = musicbrainz_spike.search_release_group(title, artist)
     groups = data.get("release-groups", [])
     if not groups:
