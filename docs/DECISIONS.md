@@ -332,8 +332,3 @@ Why: both stories generate a game session's card set, one from a theme, one from
 
 ---
 
-## 2026-09 | Story 18: verification is a lock, not a score
-
-Decision: a song's release year is fully verified and immutable, not merely high-confidence, in exactly two cases: all three structured sources (MusicBrainz, Discogs, Wikidata) agree, or two of three agree and the LLM judge has high confidence the outlier is simply wrong. Neither case is ever surfaced for human review once locked. Every other case gets flagged for review, not silently accepted: all three disagree, a source has no data at all, two sources exist but don't clearly agree with each other (a coin flip, not a confident majority), or the only data available is YouTube's own upload-date fallback, which is unreliable standing alone. This is the verification criteria story 18 previously had no tasks for.
-
-Why: the story 20 spike's metadata-source matrix (`ai/spikes/run_matrix.py`) tested this directly rather than assuming it, no case across the adversarial test set showed three-source agreement producing a wrong year, so agreement is treated as ground truth rather than merely a strong signal. The two-of-three-plus-high-LLM-confidence case is treated the same way deliberately, to avoid every partial-coverage gap (a real, common case in the matrix results) needing a human to rubber-stamp an answer the data already makes clear.
