@@ -109,6 +109,8 @@ def check_wikidata(title: str, artist: str) -> int | None:
     if not matches:
         return None
     best = wikidata_spike.pick_best_match(matches, artist)
+    if best is None:
+        return None
     time.sleep(WIKIDATA_DELAY_SECONDS)
     entity = wikidata_spike.get_entity(best["id"])["entities"][best["id"]]
     return extract_year(wikidata_spike.extract_publication_date(entity))

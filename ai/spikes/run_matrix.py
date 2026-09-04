@@ -168,6 +168,9 @@ def _wikidata_lookup(title: str, artist: str, label: str) -> str | None:
 
     top_ranked_match = matches[0]
     best = wikidata_spike.pick_best_match(matches, artist)
+    if best is None:
+        print(f"  Wikidata ({label} query): {len(matches)} match(es), none confidently tied to {artist!r}")
+        return None
     disambiguated = best is not top_ranked_match
     print(
         f"  Wikidata ({label} query): {len(matches)} match(es), picked={best['id']} ({best.get('description')})"
