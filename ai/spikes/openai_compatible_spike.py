@@ -1,8 +1,15 @@
 """Spike: exercise any OpenAI-compatible chat completions endpoint against
 the shared LlmExtractionResult schema, covering the story 20 candidates that
-expose an OpenAI-compatible API (Zhipu, Groq, DeepInfra) plus the OpenAI
-benchmark models (gpt-5.1, gpt-5-mini, gpt-5-nano) themselves, so all of them
-go through the same code path for a fair comparison. See spikes/README.md.
+expose an OpenAI-compatible API (Groq, DeepInfra, llama.cpp's local server)
+plus the OpenAI benchmark models (gpt-5.1, gpt-5-mini, gpt-5-nano)
+themselves, so all of them go through the same code path for a fair
+comparison. Zhipu's provider config stays here unused, see spikes/README.md
+for why it's dropped from the shortlist.
+
+Tries response_format's json_schema mode first; if a provider rejects that
+mode outright (observed on DeepInfra's Llama-3.1-8B-Instruct-Turbo), falls
+back to forced tool-calling automatically, a separate structured-output
+mechanism most OpenAI-compatible APIs also support.
 
 Usage: python spikes/openai_compatible_spike.py <provider> <model> "<title>" "<artist>"
 Example: python spikes/openai_compatible_spike.py groq openai/gpt-oss-20b "Roygbiv" "Boards of Canada"
@@ -12,7 +19,7 @@ import sys
 from pathlib import Path
 
 from dotenv import dotenv_values
-from openai import BadRequestError, OpenAI
+from openai import APIStatusError, BadRequestError, OpenAI
 
 from llm_schemas import LlmExtractionResult
 
@@ -43,6 +50,34 @@ def build_client(provider: str) -> OpenAI:
     return OpenAI(api_key=api_key, base_url=config["base_url"])
 
 
+EXTRACTION_TOOL_NAME = "extract_song_metadata"
+
+
+def _extract_via_tool_call(client: OpenAI, provider: str, model: str, prompt: str) -> LlmExtractionResult:
+    """Fallback for models that reject response_format's json_schema mode
+    outright (observed on DeepInfra's Llama-3.1-8B-Instruct-Turbo) but still
+    honor forced tool-calling, a separate structured-output mechanism."""
+    tool = {
+        "type": "function",
+        "function": {
+            "name": EXTRACTION_TOOL_NAME,
+            "description": "Record the extracted song metadata.",
+            "parameters": LlmExtractionResult.model_json_schema(),
+        },
+    }
+    completion = client.chat.completions.create(
+        model=model,
+        temperature=STRUCTURED_OUTPUT_TEMPERATURE,
+        messages=[{"role": "user", "content": prompt}],
+        tools=[tool],
+        tool_choice={"type": "function", "function": {"name": EXTRACTION_TOOL_NAME}},
+    )
+    tool_calls = completion.choices[0].message.tool_calls
+    if not tool_calls:
+        raise ValueError(f"{provider}/{model} did not call {EXTRACTION_TOOL_NAME} via forced tool use")
+    return LlmExtractionResult.model_validate_json(tool_calls[0].function.arguments)
+
+
 def extract(provider: str, model: str, prompt: str) -> LlmExtractionResult:
     client = build_client(provider)
     request_kwargs = {
@@ -59,6 +94,13 @@ def extract(provider: str, model: str, prompt: str) -> LlmExtractionResult:
             completion = client.chat.completions.parse(**request_kwargs)
         else:
             raise
+    except APIStatusError as api_status_error:
+        # Some models (observed on DeepInfra's Llama-3.1-8B-Instruct-Turbo) don't
+        # support response_format's json_schema mode at all; forced tool-calling
+        # is a separate mechanism worth trying before giving up on the model.
+        if api_status_error.body and "response format is not supported" in str(api_status_error.body.get("message", "")):
+            return _extract_via_tool_call(client, provider, model, prompt)
+        raise
 
     parsed = completion.choices[0].message.parsed
     if parsed is None:
