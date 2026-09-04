@@ -14,15 +14,48 @@ from _shared import DISCOGS_DELAY_SECONDS, MUSICBRAINZ_DELAY_SECONDS, WIKIDATA_D
 
 # (title, artist, album, tier, note) - album is None when there's no separate
 # album to compare against, or when guessing the title risks being wrong
+#
+# Kept from the original agreement-heavy matrix as a small sanity baseline
+# (confirm sources aren't inventing numbers), the rest is adversarial:
+# genuine reissue/pressing disagreement, thin/partial coverage, cover-version
+# attribution risk, and title collisions that could pull the wrong candidate
+# during MusicBrainz/Wikidata disambiguation. Every entry is a real song with
+# a documented reason to expect friction, not invented; which ones actually
+# produce disagreement or gaps gets confirmed by running this script, not
+# assumed from the note alone.
 SONGS = [
-    ("Never Gonna Give You Up", "Rick Astley", "Whenever You Need Somebody", "mainstream", ""),
-    ("Bohemian Rhapsody", "Queen", "A Night at the Opera", "mainstream", ""),
-    ("Billie Jean", "Michael Jackson", "Thriller", "mainstream", ""),
-    ("Windowlicker", "Aphex Twin", None, "mid", "released as its own EP, no separate parent album to compare"),
-    ("Roygbiv", "Boards of Canada", "Music Has The Right To Children", "mid", ""),
-    ("Such Great Heights", "The Postal Service", "Give Up", "mid", ""),
-    ("リサフランク420 / 現代のコンピュー", "Macintosh Plus", "Floral Shoppe", "niche", "vaporwave cult release, real stylized title, not romanized"),
-    ("Dragostea Din Tei", "O-Zone", "DiscO-Zone", "romanian", "Romanian-language, but an international hit; album title found via Wikidata's P361 link on the song entity, not guessed"),
+    # --- sanity baseline: expect agreement, catch outright invention ---
+    ("Never Gonna Give You Up", "Rick Astley", "Whenever You Need Somebody", "sanity", ""),
+    ("Bohemian Rhapsody", "Queen", "A Night at the Opera", "sanity", ""),
+    ("リサフランク420 / 現代のコンピュー", "Macintosh Plus", "Floral Shoppe", "sanity", "vaporwave cult release, real stylized title, not romanized"),
+    ("Dragostea Din Tei", "O-Zone", "DiscO-Zone", "sanity", "Romanian-language, but an international hit; album title found via Wikidata's P361 link on the song entity, not guessed"),
+
+    # --- reissue / multiple-pressing history: real risk of disagreeing "first release" years ---
+    ("Blue Monday", "New Order", None, "reissue", "1983 12\" single, deliberately never on the contemporaneous studio album; multiple distinct CD reissues since"),
+    ("Take On Me", "a-ha", "Hunting High and Low", "reissue", "a materially different 1984 original single release predates the famous 1985 re-release with the animated video"),
+    ("I Melt With You", "Modern English", "After the Snow", "reissue", "1982 original recording versus a distinct 1990 re-recording that charted separately"),
+    ("Tainted Love", "Soft Cell", "Non-Stop Erotic Cabaret", "reissue", "1981 hit is a cover; original Gloria Jones recording is 1964, risk of a source picking the wrong era"),
+    ("I Will Survive", "Gloria Gaynor", "Love Tracks", "reissue", "started as a B-side before being promoted to the A-side, murky initial release dating"),
+    ("Plastic Love", "Mariya Takeuchi", "Variety", "reissue", "1984 Japan-only release, went viral internationally decades later; risk of a source dating it to the resurgence instead"),
+
+    # --- cover-version attribution risk: contamination from the more search-popular original ---
+    ("Hurt", "Johnny Cash", "American IV: The Man Comes Back", "cover-attribution", "2002 cover; Nine Inch Nails' 1994 original is far more search-prominent"),
+    ("I Fought the Law", "The Clash", "The Clash (US)", "cover-attribution", "1979 cover; The Bobby Fuller Four's 1966 original is the more commonly indexed version"),
+
+    # --- thin / partial coverage: expect at least one source to come up empty ---
+    ("Alpha and Omega", "Boards of Canada", None, "partial-coverage", "promo-only release, thinner catalog presence than a standard single"),
+    ("Palm Mall", "猫 シ Corp", None, "partial-coverage", "self-released vaporwave, minimal label-driven metadata trail"),
+    ("Solar Will", "Enslaved", "Mið", "partial-coverage", "single released days before this test was written, parent album not out until 2026-10-30; sources may not have caught up yet"),
+    ("New Religion", "Bebe Rexha", None, "partial-coverage", "a feat.-credit single released the same week as this test; artist string deliberately excludes Faithless to test how a partial credit is handled"),
+
+    # --- title collision: same title as a different, unrelated work ---
+    ("Style", "Taylor Swift", "1989", "title-collision", "title shared with unrelated songs by other artists"),
+    ("Yesterday", "The Beatles", "Help!", "title-collision", "one of the most covered song titles in existence"),
+    ("Closer", "Nine Inch Nails", "The Downward Spiral", "title-collision", "title shared with The Chainsmokers' 2016 song, a wildly different genre and era"),
+
+    # --- extraction ambiguity: multi-artist or remix credits in the query itself ---
+    ("Under Pressure", "Queen & David Bowie", "Hot Space", "extraction-ambiguity", "dual-artist credit as a single string, tests whether a source splits or mishandles it"),
+    ("Say So", "Doja Cat", "Hot Pink", "extraction-ambiguity", "widely known via a Nicki Minaj remix version, tests whether a source conflates the remix with the original"),
 ]
 
 

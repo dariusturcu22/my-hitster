@@ -20,6 +20,15 @@ Discogs needs `DISCOGS_CONSUMER_KEY`/`DISCOGS_CONSUMER_SECRET` and YouTube
 needs `YOUTUBE_API_KEY` in `ai/.env`, same as the real app. MusicBrainz and
 Wikidata need no key.
 
+`run_matrix.py`'s `SONGS` list is deliberately adversarial past a small
+sanity baseline: reissue/pressing history, cover-version attribution risk,
+thin source coverage, title collisions, and multi-artist/remix credit
+strings, each a real song with a documented reason to expect friction.
+`extraction_test_set.py` is a separate list of messy raw submission
+strings (typos, upload-artifact noise, a deliberately unanswerable case)
+for testing an LLM's title/artist cleaning judgment directly, independent
+of source-API reconciliation, no source lookups involved.
+
 ## Story 20: local/cheap LLM candidates
 
 Same throwaway-script treatment, testing each shortlisted candidate against
