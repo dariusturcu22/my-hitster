@@ -215,9 +215,14 @@ def run_wikidata(title: str, artist: str, album: str | None) -> None:
 SOURCE_RUNNERS = {"MusicBrainz": run_musicbrainz, "Discogs": run_discogs, "Wikidata": run_wikidata}
 
 
+SONG_LABEL_COLUMN_WIDTH = 40
+TIMING_COLUMN_WIDTH = 14
+
+
 if __name__ == "__main__":
     run_started_at = time.perf_counter()
     source_seconds: dict[str, float] = {source_name: 0.0 for source_name in SOURCE_RUNNERS}
+    per_song_timings: list[tuple[str, dict[str, float]]] = []
 
     for song_index, (title, artist, album, tier, note) in enumerate(SONGS, start=1):
         header = f"=== [{song_index}/{len(SONGS)}] [{tier}] {title!r} by {artist!r}" + (
@@ -226,14 +231,31 @@ if __name__ == "__main__":
         if note:
             header += f"  ({note})"
         print(header)
+        song_source_seconds: dict[str, float] = {}
         for source_name, runner in SOURCE_RUNNERS.items():
             source_started_at = time.perf_counter()
             runner(title, artist, album)
-            source_seconds[source_name] += time.perf_counter() - source_started_at
+            elapsed_seconds = time.perf_counter() - source_started_at
+            song_source_seconds[source_name] = elapsed_seconds
+            source_seconds[source_name] += elapsed_seconds
+        per_song_timings.append((f"{title} / {artist}", song_source_seconds))
         print()
 
     total_seconds = time.perf_counter() - run_started_at
-    print("=== Run stats ===")
+    print("=== Per-song timing (seconds) ===")
+    header_row = f"{'Song':<{SONG_LABEL_COLUMN_WIDTH}}" + "".join(
+        f"{source_name:>{TIMING_COLUMN_WIDTH}}" for source_name in SOURCE_RUNNERS
+    ) + f"{'Total':>{TIMING_COLUMN_WIDTH}}"
+    print(header_row)
+    for song_label, timings in per_song_timings:
+        truncated_label = song_label[:SONG_LABEL_COLUMN_WIDTH]
+        row_total = sum(timings.values())
+        row = f"{truncated_label:<{SONG_LABEL_COLUMN_WIDTH}}" + "".join(
+            f"{timings[source_name]:>{TIMING_COLUMN_WIDTH}.1f}" for source_name in SOURCE_RUNNERS
+        ) + f"{row_total:>{TIMING_COLUMN_WIDTH}.1f}"
+        print(row)
+
+    print("\n=== Run stats ===")
     print(f"Total wall-clock time: {total_seconds:.1f}s for {len(SONGS)} songs ({total_seconds / len(SONGS):.1f}s/song average)")
     for source_name, seconds_spent in source_seconds.items():
         print(f"  {source_name}: {seconds_spent:.1f}s total, {seconds_spent / len(SONGS):.1f}s/song average")

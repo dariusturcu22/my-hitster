@@ -5,9 +5,10 @@ import httpx
 
 USER_AGENT = "hittiguess/0.1 (+https://hittiguess.com; contact@hittiguess.com)"
 
-RATE_LIMIT_TARGET_UTILIZATION = 0.75  # stay comfortably inside each source's documented ceiling, not at its edge
+RATE_LIMIT_TARGET_UTILIZATION = 0.67  # hard cap, stay comfortably inside each source's documented ceiling
 
-MUSICBRAINZ_DELAY_SECONDS = 1.35  # documented hard limit is 1 req/sec; 1.35s paces to ~74% of that
+MUSICBRAINZ_LIMIT_PER_MINUTE = 60  # documented hard limit is 1 req/sec, per IP
+MUSICBRAINZ_DELAY_SECONDS = 60 / (MUSICBRAINZ_LIMIT_PER_MINUTE * RATE_LIMIT_TARGET_UTILIZATION)
 # Wikidata and Discogs pace themselves internally instead of exposing a fixed constant
 # here: Wikidata's rate depends on whether a bot-password login is configured (10/min
 # anonymous vs 200/min authenticated, see wikidata_spike.py), and Discogs paces off the
