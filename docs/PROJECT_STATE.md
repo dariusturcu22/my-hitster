@@ -30,7 +30,7 @@ A story can have draft tasks written against it in TASKS.md while still marked N
 | 15 | Song/playlist relational fix, so one song can belong to multiple playlists | Backend | Ready |
 | 16 | pgvector-based duplicate detection before running the metadata pipeline | Backend / AI | Ready |
 | 17 | Community song reports: report button, message, correct year, sources | Frontend / Backend | Ready, admin review surface additionally needs story 19's admin role, not yet built |
-| 18 | Criteria for promoting a reported or newly submitted song to verified | Backend | Needs Definition |
+| 18 | Criteria for promoting a reported or newly submitted song to verified | Backend | Needs Definition, criteria decided (`DECISIONS.md`) and draft tasks exist, blocked on story 23's `verificationStatus` field, which doesn't exist yet |
 | 19 | Admin bulk song import | Backend | Consolidated into story 40 |
 | 20 | Local LLM option for lower-cost bulk metadata processing | AI | Needs Definition, model/technique choice needs a separate exploration pass first |
 | 21 | Auto-generated featured playlists: consolidated into story 30, see there for its card-assembly tasks | Backend / AI | Consolidated into story 30 |

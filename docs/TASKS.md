@@ -275,9 +275,12 @@ Checked against real code: `Song` has a single `youtubeId` field and no lookup q
 
 Both paths depend on the same cheap first step: checking submitted YouTube IDs against the database before anything else happens. Both also depend on story 20's LLM choice for the admin backlog's scheduled drain (needs a daily quota to pace against) and on the metadata-sourcing spike's real implementation (`musicbrainz.py`, `wikidata.py`) actually existing, not just validated in `ai/spikes/`.
 
+Story 18's verification lock (`DECISIONS.md`) changes the shape of this story's LLM dependency significantly: the story 20 spike's adversarial matrix found unanimous three-source agreement on 12 of 21 songs, meaning the LLM reconciliation call is only needed for a minority of songs, not every one. This narrows, but doesn't remove, the undecided items below.
+
 Two things intentionally left undecided here, not assumed:
-- Which LLM tier an on-the-spot user request uses when the song isn't already in the database: always the existing paid OpenAI client (simplest, guaranteed available), or try the cheap/free tier first if that day's quota isn't exhausted by the admin backlog, falling back to paid only then. Depends on story 20's outcome.
+- Which LLM tier an on-the-spot user request uses for the minority of songs the story 18 lock doesn't resolve: always the existing paid OpenAI client (simplest, guaranteed available, and now plausibly cheap enough in practice given the lock cuts call volume substantially), or try the cheap/free tier first if that day's quota isn't exhausted by the admin backlog, falling back to paid only then. Depends on story 20's outcome, but the lock's existence is itself an argument for not over-engineering a cheap-tier fallback if paid-tier volume turns out small.
 - Exactly how the alternate-YouTube-ID-to-Song mapping interacts with story 16's pgvector near-duplicate detection: this story's YouTube-ID check is a cheap, exact, pre-pipeline step; story 16's embedding check is a fallback for when the ID is genuinely new but the song might not be, both still apply, the sequencing between them (ID check, then embedding check, then full pipeline) needs confirming once story 16 actually exists.
+- **New, surfaced during story 20's spike, not yet decided**: the admin backlog drain and the on-the-spot path call the same external MusicBrainz/Discogs/Wikidata rate limits from the same outbound IP, they aren't independent budgets. "On-the-spot always wins on priority" is already decided for queue ordering, but nothing yet defines what that means when the backlog drain is mid-request and a live user shows up, or how multiple concurrent on-the-spot users share the same per-source ceiling. A reasonable starting shape: the backlog drain checks a shared rate-limit state before each call and yields (skips its turn until the next scheduled tick) whenever recent on-the-spot activity is detected, rather than the two paths contending for the same token bucket in real time. Not built, needs its own design pass, likely expected to matter less over time as catalog coverage grows and fewer requests need a live lookup at all.
 
 - [ ] Add a table mapping alternate YouTube video IDs to an existing `Song` (many YouTube IDs to one canonical song), separate from `Song`'s own primary `youtubeId`, so a different upload of an already-known track (a lyric video, a Topic-channel version, a re-upload) doesn't create a duplicate `Song` row or re-run the pipeline
 - [ ] Add a batch YouTube-ID lookup (`SongRepository` needs its first custom query methods for this): given a list of IDs, returns which are already known, checking both `Song.youtubeId` and the new alternate-ID table, no external API calls, this is the shared first step both paths below depend on
@@ -290,6 +293,8 @@ Two things intentionally left undecided here, not assumed:
 - [ ] Any unresolved ID from this path is processed immediately, independent of the admin backlog's schedule, even when the same ID is also sitting in that backlog waiting its turn
 - [ ] Query MusicBrainz and Wikidata first with the title/channel-derived artist (per the existing metadata-sourcing spike's design); if both return zero matches, that's the trigger for an LLM extraction pass over the raw title, channel, and description, not a subjective "does this channel look like an artist" judgment, then retry the same source queries with the corrected artist
 - [ ] If the retry also comes up empty, route to manual review rather than guessing, title and artist need to be verified correct, never a confidence score the way the release year gets one
+- [ ] Once title/artist are resolved, query all three structured sources (MusicBrainz, Discogs, Wikidata) for release-year candidates and run story 18's lock-evaluation logic; only call the LLM for year reconciliation when the lock doesn't resolve it, this is the step that keeps the LLM as a minority-case fallback rather than a call made on every song
+- [ ] Depends on story 24: run the three sources' fetches concurrently rather than sequentially for the on-the-spot path specifically, where a user is waiting on the result; the admin backlog drain has no such latency pressure and can stay sequential if that's simpler to build first
 - [ ] Coordinate with story 23: `metadataRaw` should persist the curated, actually-used subset of each source's response, not the full raw API response, Wikidata's own entity dumps alone ran into the tens of KB per song during this spike's testing; at that size the 500MB Supabase free-tier cap holds roughly 10,000-50,000 songs instead of 170,000+ with a curated version
 
 Tests:
@@ -338,7 +343,18 @@ Tests:
 
 ## Story 18: Criteria for promoting a reported or newly submitted song to verified
 
-Still an open design question (see `PROJECT_STATE.md`'s open questions): whether verification is confidence-threshold-based, manual admin review, some combination, or something else isn't decided. No tasks drafted here, writing implementation tasks now would mean inventing the undecided design itself rather than reflecting a real decision. Stories 17, 19, 23, and 32 all reference this story's eventual outcome without depending on its implementation timeline.
+Criteria decided (`DECISIONS.md`'s "Story 18: verification is a lock, not a score" entry), grounded in the story 20 spike's live matrix testing rather than assumed. Checked against real code: `Song` (`backend/.../model/song/Song.java`) has no `verificationStatus`, `confidence`, or `metadataRaw` field today, all three are story 23's scope, still undone. This story's implementation is blocked on story 23 landing that schema first, tasks are drafted here so the decision isn't lost, not because they're startable yet.
+
+- [ ] Depends on story 23: `verificationStatus` field exists on `Song` before any of this can be implemented
+- [ ] Add the lock-evaluation logic: given the release-year candidates from all sources that returned one, lock (set `verificationStatus` to verified, immutable from here) when either all three structured sources agree, or two of three agree and an LLM judge call returns high confidence the outlier is wrong
+- [ ] Every other outcome (all three disagree, a source has no match, two sources exist but don't agree, or only YouTube's upload-date fallback has a year) sets status to needs-review instead, never silently accepted
+- [ ] Once locked, no code path may overwrite the year, including story 17's community reports, a report against a locked song surfaces for admin judgment but can't auto-apply
+- [ ] Wire this into story 40's submission pipeline (both the admin backlog drain and the on-the-spot path) as the step that runs immediately after source gathering, before any LLM reconciliation call, so the LLM is only invoked for the fraction of songs the lock doesn't resolve
+
+Tests:
+- [ ] Unit tests for the lock-evaluation logic covering all five outcomes (3-agree, 2-agree-high-confidence, 3-disagree, missing-source, YouTube-only)
+- [ ] Unit test confirming a locked song's year is immutable even via story 17's report path
+- [ ] Integration test: a submission with unanimous source agreement never triggers an LLM call at all
 
 ## Story 32: LLM-as-judge catalog audit
 
