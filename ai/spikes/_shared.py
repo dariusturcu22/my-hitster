@@ -20,7 +20,12 @@ RETRYABLE_HTTP_STATUS_CODES = (429, 503)
 REQUEST_TIMEOUT_SECONDS = 10.0
 YEAR_DIGIT_COUNT = 4
 
-sys.stdout.reconfigure(encoding="utf-8")
+sys.stdout.reconfigure(encoding="utf-8", line_buffering=True)
+
+# Keyed by "<status_code>" for an HTTP retry or the exception class name for a
+# transport-level failure, incremented on every backoff, not just the final
+# outcome, so a request that succeeds on its 3rd attempt still counts 2 retries.
+RETRY_EVENT_COUNTS: dict[str, int] = {}
 
 
 def get_with_backoff(url: str, *, params: dict | None = None, headers: dict | None = None,
@@ -36,8 +41,10 @@ def get_with_backoff(url: str, *, params: dict | None = None, headers: dict | No
         except httpx.TransportError as transport_error:
             last_transport_error = transport_error
             wait_seconds = base_delay_seconds * (BACKOFF_MULTIPLIER**attempt_number)
+            event_key = type(transport_error).__name__
+            RETRY_EVENT_COUNTS[event_key] = RETRY_EVENT_COUNTS.get(event_key, 0) + 1
             print(
-                f"  [{type(transport_error).__name__}, backing off {wait_seconds:.1f}s "
+                f"  [{event_key}, backing off {wait_seconds:.1f}s "
                 f"before retry {attempt_number + 1}/{max_retries}]"
             )
             time.sleep(wait_seconds)
@@ -49,6 +56,8 @@ def get_with_backoff(url: str, *, params: dict | None = None, headers: dict | No
             wait_seconds = (
                 max(float(retry_after_header), minimum_wait_seconds) if retry_after_header else minimum_wait_seconds
             )
+            event_key = str(response.status_code)
+            RETRY_EVENT_COUNTS[event_key] = RETRY_EVENT_COUNTS.get(event_key, 0) + 1
             print(
                 f"  [{response.status_code}, backing off {wait_seconds:.1f}s "
                 f"before retry {attempt_number + 1}/{max_retries}]"

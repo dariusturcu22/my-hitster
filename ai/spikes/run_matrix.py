@@ -10,7 +10,13 @@ import time
 import discogs_spike
 import musicbrainz_spike
 import wikidata_spike
-from _shared import DISCOGS_DELAY_SECONDS, MUSICBRAINZ_DELAY_SECONDS, WIKIDATA_DELAY_SECONDS, extract_year
+from _shared import (
+    DISCOGS_DELAY_SECONDS,
+    MUSICBRAINZ_DELAY_SECONDS,
+    RETRY_EVENT_COUNTS,
+    WIKIDATA_DELAY_SECONDS,
+    extract_year,
+)
 
 # (title, artist, album, tier, note) - album is None when there's no separate
 # album to compare against, or when guessing the title risks being wrong
@@ -220,13 +226,32 @@ def run_wikidata(title: str, artist: str, album: str | None) -> None:
         )
 
 
+SOURCE_RUNNERS = {"MusicBrainz": run_musicbrainz, "Discogs": run_discogs, "Wikidata": run_wikidata}
+
+
 if __name__ == "__main__":
-    for title, artist, album, tier, note in SONGS:
-        header = f"=== [{tier}] {title!r} by {artist!r}" + (f" (album: {album!r})" if album else "") + " ==="
+    run_started_at = time.perf_counter()
+    source_seconds: dict[str, float] = {source_name: 0.0 for source_name in SOURCE_RUNNERS}
+
+    for song_index, (title, artist, album, tier, note) in enumerate(SONGS, start=1):
+        header = f"=== [{song_index}/{len(SONGS)}] [{tier}] {title!r} by {artist!r}" + (
+            f" (album: {album!r})" if album else ""
+        ) + " ==="
         if note:
             header += f"  ({note})"
         print(header)
-        run_musicbrainz(title, artist, album)
-        run_discogs(title, artist, album)
-        run_wikidata(title, artist, album)
+        for source_name, runner in SOURCE_RUNNERS.items():
+            source_started_at = time.perf_counter()
+            runner(title, artist, album)
+            source_seconds[source_name] += time.perf_counter() - source_started_at
         print()
+
+    total_seconds = time.perf_counter() - run_started_at
+    print("=== Run stats ===")
+    print(f"Total wall-clock time: {total_seconds:.1f}s for {len(SONGS)} songs ({total_seconds / len(SONGS):.1f}s/song average)")
+    for source_name, seconds_spent in source_seconds.items():
+        print(f"  {source_name}: {seconds_spent:.1f}s total, {seconds_spent / len(SONGS):.1f}s/song average")
+    if RETRY_EVENT_COUNTS:
+        print(f"Retry/backoff events: {dict(RETRY_EVENT_COUNTS)}")
+    else:
+        print("Retry/backoff events: none")
