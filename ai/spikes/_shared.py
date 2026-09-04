@@ -8,16 +8,12 @@ USER_AGENT = "hittiguess/0.1 (+https://hittiguess.com; contact@hittiguess.com)"
 RATE_LIMIT_TARGET_UTILIZATION = 0.75  # stay comfortably inside each source's documented ceiling, not at its edge
 
 MUSICBRAINZ_DELAY_SECONDS = 1.35  # documented hard limit is 1 req/sec; 1.35s paces to ~74% of that
-# Confirmed against mediawiki.org/wiki/Wikimedia_APIs/Rate_limits: 10/min applies to
-# requests with no identifying characteristics beyond IP, which is what an anonymous
-# script is, the 200/min tier is specifically for browser-based traffic, not just a
-# script with a descriptive User-Agent. 8.0s paces to exactly 75% of the 10/min ceiling.
-# A Wikimedia bot-password account unlocks 200/min (any logged-in account, no approval
-# needed) or 2,000/min (established editors), see ai/spikes/README.md.
-WIKIDATA_DELAY_SECONDS = 8.0
-# Discogs paces itself dynamically off the real X-Discogs-Ratelimit-* response headers
-# (see discogs_spike.py's DiscogsRateLimiter) rather than a fixed delay, since Discogs
-# is the one source that actually tells you your live quota usage.
+# Wikidata and Discogs pace themselves internally instead of exposing a fixed constant
+# here: Wikidata's rate depends on whether a bot-password login is configured (10/min
+# anonymous vs 200/min authenticated, see wikidata_spike.py), and Discogs paces off the
+# real X-Discogs-Ratelimit-* response headers it returns (see discogs_spike.py's
+# DiscogsRateLimiter) rather than a guess, since it's the one source that actually
+# tells you your live quota usage.
 
 DEFAULT_MAX_RETRIES = 4
 DEFAULT_BASE_DELAY_SECONDS = 5.0
@@ -35,15 +31,19 @@ RETRY_EVENT_COUNTS: dict[str, int] = {}
 
 
 def get_with_backoff(url: str, *, params: dict | None = None, headers: dict | None = None,
+                      client: httpx.Client | None = None,
                       max_retries: int = DEFAULT_MAX_RETRIES,
                       base_delay_seconds: float = DEFAULT_BASE_DELAY_SECONDS) -> httpx.Response:
     """GET with retry/backoff on rate-limit responses and transport-level
     failures. Honors Retry-After when the server sends one, otherwise backs
-    off exponentially."""
+    off exponentially. Pass an httpx.Client (for example, one already
+    holding an authenticated login session's cookies) to reuse it instead
+    of a one-off anonymous request."""
+    requester = client.get if client is not None else httpx.get
     last_transport_error: httpx.TransportError | None = None
     for attempt_number in range(max_retries):
         try:
-            response = httpx.get(url, params=params, headers=headers, timeout=REQUEST_TIMEOUT_SECONDS)
+            response = requester(url, params=params, headers=headers, timeout=REQUEST_TIMEOUT_SECONDS)
         except httpx.TransportError as transport_error:
             last_transport_error = transport_error
             wait_seconds = base_delay_seconds * (BACKOFF_MULTIPLIER**attempt_number)

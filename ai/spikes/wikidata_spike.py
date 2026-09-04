@@ -9,8 +9,15 @@ Usage: python spikes/wikidata_spike.py "<title>" "<artist>"
 """
 
 import sys
+import time
+from pathlib import Path
 
-from _shared import USER_AGENT, get_with_backoff
+import httpx
+from dotenv import dotenv_values
+
+from _shared import RATE_LIMIT_TARGET_UTILIZATION, USER_AGENT, get_with_backoff
+
+_env = dotenv_values(Path(__file__).resolve().parent.parent / ".env")
 
 API_URL = "https://www.wikidata.org/w/api.php"
 DEFAULT_SEARCH_LIMIT = 20
@@ -20,39 +27,88 @@ PART_OF_PROPERTY = "P361"
 COUNTRY_OF_ORIGIN_PROPERTY = "P495"
 LANGUAGE_OF_WORK_PROPERTY = "P407"
 
+# Confirmed against mediawiki.org/wiki/Wikimedia_APIs/Rate_limits: 10/min applies to
+# requests with no identifying characteristics beyond IP; any logged-in account, no
+# approval needed, gets 200/min. See spikes/README.md for how to get a bot password.
+ANONYMOUS_LIMIT_PER_MINUTE = 10
+AUTHENTICATED_LIMIT_PER_MINUTE = 200
+
+
+def _build_authenticated_client() -> httpx.Client | None:
+    """A Special:BotPasswords login (WIKIDATA_BOT_USERNAME/PASSWORD in
+    ai/.env) unlocks the 200/minute authenticated tier. Falls back to
+    anonymous access, and the slower 10/minute tier, if unset. MediaWiki's
+    login flow is a two-step token-then-login exchange, not HTTP Basic
+    Auth, and requires persisting the session cookie across every
+    subsequent call, hence a real httpx.Client rather than one-off
+    requests."""
+    bot_username = _env.get("WIKIDATA_BOT_USERNAME")
+    bot_password = _env.get("WIKIDATA_BOT_PASSWORD")
+    if not bot_username or not bot_password:
+        return None
+
+    client = httpx.Client(headers={"User-Agent": USER_AGENT})
+    token_response = client.get(
+        API_URL, params={"action": "query", "meta": "tokens", "type": "login", "format": "json"}
+    )
+    login_token = token_response.json()["query"]["tokens"]["logintoken"]
+    login_response = client.post(
+        API_URL,
+        data={
+            "action": "login",
+            "lgname": bot_username,
+            "lgpassword": bot_password,
+            "lgtoken": login_token,
+            "format": "json",
+        },
+    )
+    login_result = login_response.json().get("login", {}).get("result")
+    if login_result != "Success":
+        raise RuntimeError(f"Wikidata bot-password login failed: {login_response.json()}")
+    return client
+
+
+_authenticated_client = _build_authenticated_client()
+DELAY_SECONDS = 60 / (
+    (AUTHENTICATED_LIMIT_PER_MINUTE if _authenticated_client else ANONYMOUS_LIMIT_PER_MINUTE)
+    * RATE_LIMIT_TARGET_UTILIZATION
+)
+
+
+def _get(params: dict) -> dict:
+    time.sleep(DELAY_SECONDS)
+    response = get_with_backoff(
+        API_URL, params=params, headers={"User-Agent": USER_AGENT}, client=_authenticated_client
+    )
+    return response.json()
+
 
 def search_entity(title: str, limit: int = DEFAULT_SEARCH_LIMIT) -> dict:
     """A common title can bury the actual song many results past a narrow
     search window, a small limit risks never seeing the real entity at
     all."""
-    response = get_with_backoff(
-        API_URL,
-        params={
+    return _get(
+        {
             "action": "wbsearchentities",
             "search": title,
             "language": "en",
             "type": "item",
             "format": "json",
             "limit": limit,
-        },
-        headers={"User-Agent": USER_AGENT},
+        }
     )
-    return response.json()
 
 
 def get_entity(entity_id: str) -> dict:
-    response = get_with_backoff(
-        API_URL,
-        params={
+    return _get(
+        {
             "action": "wbgetentities",
             "ids": entity_id,
             "props": "labels|claims",
             "languages": "en",
             "format": "json",
-        },
-        headers={"User-Agent": USER_AGENT},
+        }
     )
-    return response.json()
 
 
 _MUSIC_DESCRIPTION_KEYWORDS = ("single", "song", "album", "track", " ep", "recording", "record")
@@ -125,12 +181,9 @@ def get_sitelinks_count(entity_id: str) -> int:
     rough proxy for how internationally known something is: a song with
     dozens of language editions is plausibly more globally recognized than
     one with only its home-country language's article, or none."""
-    response = get_with_backoff(
-        API_URL,
-        params={"action": "wbgetentities", "ids": entity_id, "props": "sitelinks", "format": "json"},
-        headers={"User-Agent": USER_AGENT},
-    )
-    entity = response.json()["entities"][entity_id]
+    entity = _get({"action": "wbgetentities", "ids": entity_id, "props": "sitelinks", "format": "json"})["entities"][
+        entity_id
+    ]
     return len(entity.get("sitelinks", {}))
 
 
@@ -149,18 +202,15 @@ def extract_entity_id_claim(entity: dict, property_id: str) -> str | None:
 def resolve_labels(entity_ids: list[str]) -> dict[str, str]:
     if not entity_ids:
         return {}
-    response = get_with_backoff(
-        API_URL,
-        params={
+    entities = _get(
+        {
             "action": "wbgetentities",
             "ids": "|".join(entity_ids),
             "props": "labels",
             "languages": "en",
             "format": "json",
-        },
-        headers={"User-Agent": USER_AGENT},
-    )
-    entities = response.json()["entities"]
+        }
+    )["entities"]
     return {
         entity_id: entities[entity_id]["labels"].get("en", {}).get("value", entity_id) for entity_id in entity_ids
     }

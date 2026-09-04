@@ -10,7 +10,7 @@ import time
 import discogs_spike
 import musicbrainz_spike
 import wikidata_spike
-from _shared import MUSICBRAINZ_DELAY_SECONDS, RETRY_EVENT_COUNTS, WIKIDATA_DELAY_SECONDS, extract_year
+from _shared import MUSICBRAINZ_DELAY_SECONDS, RETRY_EVENT_COUNTS, extract_year
 
 # (title, artist, album, tier, note) - album is None when there's no separate
 # album to compare against, or when guessing the title risks being wrong
@@ -174,16 +174,13 @@ def _wikidata_lookup(title: str, artist: str, label: str) -> str | None:
         f"{' [disambiguated away from top rank]' if disambiguated else ''}"
     )
     top_id = best["id"]
-    time.sleep(WIKIDATA_DELAY_SECONDS)
     entity = wikidata_spike.get_entity(top_id)["entities"][top_id]
     date = wikidata_spike.extract_publication_date(entity)
     country_id = wikidata_spike.extract_entity_id_claim(entity, wikidata_spike.COUNTRY_OF_ORIGIN_PROPERTY)
     language_id = wikidata_spike.extract_entity_id_claim(entity, wikidata_spike.LANGUAGE_OF_WORK_PROPERTY)
 
-    time.sleep(WIKIDATA_DELAY_SECONDS)
     labels = wikidata_spike.resolve_labels([entity_id for entity_id in (country_id, language_id) if entity_id])
 
-    time.sleep(WIKIDATA_DELAY_SECONDS)
     sitelinks_count = wikidata_spike.get_sitelinks_count(top_id)
 
     print(f"  Wikidata ({label}) P577 (publication date): {date}")
@@ -194,12 +191,10 @@ def _wikidata_lookup(title: str, artist: str, label: str) -> str | None:
 
 
 def run_wikidata(title: str, artist: str, album: str | None) -> None:
-    time.sleep(WIKIDATA_DELAY_SECONDS)
     track_date = _wikidata_lookup(title, artist, "track")
 
     album_date = None
     if album:
-        time.sleep(WIKIDATA_DELAY_SECONDS)
         album_date = _wikidata_lookup(album, artist, "album")
         if album_date and track_date:
             agreement = "agrees" if extract_year(album_date) == extract_year(track_date) else "DIFFERS"

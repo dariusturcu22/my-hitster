@@ -17,7 +17,7 @@ from dotenv import dotenv_values
 import discogs_spike
 import musicbrainz_spike
 import wikidata_spike
-from _shared import MUSICBRAINZ_DELAY_SECONDS, USER_AGENT, WIKIDATA_DELAY_SECONDS, extract_year, get_with_backoff
+from _shared import MUSICBRAINZ_DELAY_SECONDS, USER_AGENT, extract_year, get_with_backoff
 
 _env = dotenv_values(Path(__file__).resolve().parent.parent / ".env")
 
@@ -91,16 +91,12 @@ def check_discogs(title: str, artist: str) -> int | None:
 
 
 def check_wikidata(title: str, artist: str) -> int | None:
-    import time
-
-    time.sleep(WIKIDATA_DELAY_SECONDS)
     matches = wikidata_spike.search_entity(title).get("search", [])
     if not matches:
         return None
     best = wikidata_spike.pick_best_match(matches, artist)
     if best is None:
         return None
-    time.sleep(WIKIDATA_DELAY_SECONDS)
     entity = wikidata_spike.get_entity(best["id"])["entities"][best["id"]]
     return extract_year(wikidata_spike.extract_publication_date(entity))
 
