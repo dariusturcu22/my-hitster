@@ -17,6 +17,7 @@ from dotenv import dotenv_values
 import discogs_spike
 import musicbrainz_spike
 import wikidata_spike
+import youtube_quota
 from _shared import MUSICBRAINZ_DELAY_SECONDS, USER_AGENT, extract_year, get_with_backoff
 
 _env = dotenv_values(Path(__file__).resolve().parent.parent / ".env")
@@ -25,12 +26,14 @@ RELEASED_ON_PATTERN = re.compile(r"Released on:\s*(?P<release_year>\d{4})-\d{2}-
 TOPIC_SUFFIX_PATTERN = re.compile(r"\s*-\s*Topic$")
 
 PLAYLIST_ITEMS_PAGE_SIZE = 50
+PLAYLIST_ITEMS_LIST_COST_UNITS = 1
 
 
 def fetch_playlist_items(playlist_id: str) -> list[dict]:
     items = []
     page_token = None
     while True:
+        youtube_quota.charge(PLAYLIST_ITEMS_LIST_COST_UNITS, operation="playlistItems.list")
         params = {
             "part": "snippet",
             "maxResults": PLAYLIST_ITEMS_PAGE_SIZE,

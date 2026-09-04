@@ -9,14 +9,17 @@ import sys
 from pathlib import Path
 
 from dotenv import dotenv_values
+import youtube_quota
 from _shared import get_with_backoff
 
 _env = dotenv_values(Path(__file__).resolve().parent.parent / ".env")
 
 DESCRIPTION_PREVIEW_LENGTH = 300
+VIDEOS_LIST_COST_UNITS = 1
 
 
 def fetch_video(video_id: str) -> dict:
+    youtube_quota.charge(VIDEOS_LIST_COST_UNITS, operation="videos.list")
     response = get_with_backoff(
         "https://www.googleapis.com/youtube/v3/videos",
         params={

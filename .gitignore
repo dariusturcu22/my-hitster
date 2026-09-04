@@ -11,6 +11,9 @@ Makefile.local
 # --- Local LLM binaries and model weights (story 20 spike) ---
 ai/local-llm/
 
+# --- Local runtime state for spike scripts ---
+ai/spikes/.youtube_quota_state.json
+
 # --- Environment Secrets ---
 .env
 .env.local
