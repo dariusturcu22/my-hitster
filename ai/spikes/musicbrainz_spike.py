@@ -4,11 +4,60 @@ Usage: python spikes/musicbrainz_spike.py "<title>" "<artist>"
 """
 
 import sys
+import time
 from urllib.parse import quote
 
-from _shared import USER_AGENT, get_with_backoff
+from _shared import MUSICBRAINZ_DELAY_SECONDS, RETRY_EVENT_COUNTS, USER_AGENT, get_with_backoff
 
 RELEASE_GROUP_SEARCH_LIMIT = 10
+
+SUCCESS_STREAK_BEFORE_EASING = 5  # only relax after a real run of clean calls, not one lucky response
+EASE_STEP_SECONDS = 0.1
+BACKOFF_MULTIPLIER = 1.5
+MAX_DELAY_SECONDS = 10.0
+
+
+class MusicBrainzRateLimiter:
+    """MusicBrainz exposes no quota-usage headers to adapt off, unlike
+    Discogs, so this adapts off observed outcomes instead: a retryable
+    failure (503, timeout) triggers a multiplicative back-off, the same
+    congestion-control idea TCP uses. Recovers additively, a small step at
+    a time, back toward the 67%-target baseline on a sustained run of
+    clean calls, never below that baseline, since without a real usage
+    signal there's no way to confirm going faster than the documented cap
+    allows stays safe."""
+
+    def __init__(self, baseline_delay_seconds: float = MUSICBRAINZ_DELAY_SECONDS):
+        self.baseline_delay_seconds = baseline_delay_seconds
+        self.delay_seconds = baseline_delay_seconds
+        self.consecutive_successes = 0
+
+    def wait(self) -> None:
+        time.sleep(self.delay_seconds)
+
+    def record_success(self) -> None:
+        self.consecutive_successes += 1
+        if self.consecutive_successes >= SUCCESS_STREAK_BEFORE_EASING and self.delay_seconds > self.baseline_delay_seconds:
+            self.delay_seconds = max(self.baseline_delay_seconds, self.delay_seconds - EASE_STEP_SECONDS)
+            self.consecutive_successes = 0
+
+    def record_failure(self) -> None:
+        self.consecutive_successes = 0
+        self.delay_seconds = min(self.delay_seconds * BACKOFF_MULTIPLIER, MAX_DELAY_SECONDS)
+
+
+rate_limiter = MusicBrainzRateLimiter()
+
+
+def _get(url: str) -> dict:
+    rate_limiter.wait()
+    retry_count_before = sum(RETRY_EVENT_COUNTS.values())
+    response = get_with_backoff(url, headers={"User-Agent": USER_AGENT})
+    if sum(RETRY_EVENT_COUNTS.values()) > retry_count_before:
+        rate_limiter.record_failure()
+    else:
+        rate_limiter.record_success()
+    return response.json()
 
 
 def search_release_group(title: str, artist: str) -> dict:
@@ -17,14 +66,11 @@ def search_release_group(title: str, artist: str) -> dict:
         f"https://musicbrainz.org/ws/2/release-group/?query={quote(query)}"
         f"&fmt=json&limit={RELEASE_GROUP_SEARCH_LIMIT}"
     )
-    response = get_with_backoff(url, headers={"User-Agent": USER_AGENT})
-    return response.json()
+    return _get(url)
 
 
 def get_artist(artist_id: str) -> dict:
-    url = f"https://musicbrainz.org/ws/2/artist/{artist_id}?fmt=json"
-    response = get_with_backoff(url, headers={"User-Agent": USER_AGENT})
-    return response.json()
+    return _get(f"https://musicbrainz.org/ws/2/artist/{artist_id}?fmt=json")
 
 
 def select_best_release_group(release_groups: list[dict], prefer_type: str = "Single") -> dict | None:

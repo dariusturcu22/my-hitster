@@ -329,3 +329,98 @@ Why: the original framing, "recommend songs a user might like," doesn't fit how 
 Decision: story 21's tasks (theme-based catalog search, genre/popularity fields, metadata-pipeline gap-filling, the review UI) move into story 30's task list directly. Story 21's row in `PROJECT_STATE.md` points to story 30 instead of carrying its own tasks.
 
 Why: both stories generate a game session's card set, one from a theme, one from a difficulty tier; keeping them as two separate stories with two separate generation endpoints would mean building the same underlying mechanism twice instead of once with two combinable selection criteria.
+
+---
+
+## 2026-09 | Metadata pipeline final shape: two-tier lock-or-LLM, Wikipedia added as a fourth source
+
+Decision: the metadata pipeline for resolving a song's release year has two tiers, both now final. Patient tier (the admin backlog drain, and full verification of anything the fast tier touches): query MusicBrainz, Discogs, and Wikidata always; lock the year immediately with no LLM call at all when all three agree exactly; when they don't, fetch and extract Wikipedia (a dedicated reading-comprehension LLM call) and reconcile all four sources' candidates with a second LLM call. Fast tier (on-the-spot, answers immediately): dispatch each song to exactly one of MusicBrainz or Wikipedia, never both, whichever is free grabs the next song under dynamic work-stealing dispatch rather than a fixed split; every fast-tier answer is provisional and gets re-queued through the patient tier afterward. Wikipedia is added as a fourth structured/LLM-assisted source, alongside MusicBrainz, Discogs, and Wikidata. Model choice: gpt-5-nano reconciles among structured candidates, DeepSeek-V4-Flash reads Wikipedia's prose, two different models for two different jobs, not one model for everything.
+
+Why: validated against a real 70-song test set spanning mainstream, adversarial, and niche/regional cases, not guessed at. The patient tier scored 99% (69/70), with 53% of songs locking without any LLM call at all. The fast tier scored 90% (63/70). Wikipedia earned a permanent seat in the pipeline specifically because its errors are largely uncorrelated with the other three sources': it solved cases (a single-vs-album date trap, a case where two independent structured sources agreed with each other on the same wrong year) that all three structured sources missed together, at the cost of a few new mistakes of its own that the other sources don't make. The two-model split exists because a real test found gpt-5-nano notably worse at the reading-comprehension extraction task specifically, despite being the stronger reconciler of the two, one model wasn't uniformly best at both jobs.
+
+Open item: this settles the pipeline shape itself, not expected to be revisited again barring a real problem found during implementation. What a genuine no-answer (no source has anything at all) does downstream, and whether any of this gets built into the real AI microservice versus staying validated-but-unbuilt in the spike, are both still open, see `TASKS.md`.
+
+---
+
+## 2026-09 | Rate-limit contention: on-the-spot traffic always preempts the admin backlog
+
+Decision: the admin catalog-seeding backlog drain and on-the-spot user requests (including playlist imports) share the same external rate-limit budgets, MusicBrainz, Discogs, Wikidata, and Wikipedia all come from the same outbound IP. On-the-spot traffic is always high priority; the backlog drain pauses while any on-the-spot traffic is active and resumes once it's clear, rather than the two paths contending for the same budget in real time. Every song the fast tier answers provisionally gets re-added to the admin backlog afterward, to be resolved properly through the patient pipeline at low priority like everything else already in that queue.
+
+Why: this was surfaced, not resolved, when story 40 was first drafted; "on-the-spot always wins on priority" was already decided for queue ordering, but nothing defined what that meant for the two paths' shared external rate-limit budgets specifically. A pause-and-resume design avoids building real-time token-bucket arbitration between two internal consumers of the same external ceiling, and fits the two-tier pipeline's own shape: the backlog drain has no latency pressure of its own, so yielding to on-the-spot traffic costs it nothing but time.
+
+---
+
+## 2026-09 | Verification schema: one release-year field, four-tier verificationStatus, reportable at every tier
+
+Decision: release year is one mutable field plus `verificationStatus`, not a separate `submittedYear`/`verifiedYear` pair. `verificationStatus` has four tiers: `UNVERIFIED` (default, not yet processed), `VERIFIED` (story 18's lock, all three structured sources agreed, immutable except through the report/re-verification process), `NEEDS_REVIEW` (an LLM-reconciled year, not locked), and `MANUAL_ENTRY` (a human-entered year for a song no source, including Wikipedia, had any data on at all, the least-trusted tier). Every card, at every tier including `VERIFIED`, can be reported; a report against an already-`VERIFIED` card sinks to the bottom of the admin review queue rather than being blocked outright.
+
+Why: a single field plus a status is simpler than two year fields and still gives a clear audit trail, whether a year is locked, LLM-guessed, or human-entered is exactly the information that mattered about "was this corrected," not preserving a separate original-submission value alongside it. `MANUAL_ENTRY` exists as its own tier, below `NEEDS_REVIEW`, because a human guess with zero source corroboration is a genuinely different confidence level than an LLM reconciling real, if disagreeing, source data. Allowing reports on locked cards too, rather than exempting them, keeps one code path for every card; the admin-queue priority ordering (lowest confidence first, already decided) does the real work of not wasting review time on a report against a card three independent official sources already agreed on.
+
+Open item: the report's own data shape (message, suggested year, one or more sources) was already decided in the 2026-08 "Community verification through reports" entry above. How a submitted report actually gets resolved, whether that stays fully manual or has any automated assist, and how the community thumbs-up signal on `NEEDS_REVIEW`/`MANUAL_ENTRY` cards works mechanically (a vote threshold, what it does to `verificationStatus`, if anything, on its own) are still under discussion, not settled here.
+
+---
+
+## 2026-09 | Story 32 dropped: redundant with the verification pipeline
+
+Decision: story 32 (a scheduled, periodic LLM-as-judge pass over the whole catalog flagging likely duplicate or mislabeled songs) is dropped, not deferred.
+
+Why: every song already gets verified on submission through story 18's pipeline, and a fast-tier answer gets re-verified through the patient tier afterward. A separate scheduled audit pass over the whole catalog duplicates that coverage. A manual, admin-triggered version, run on demand rather than on a schedule, isn't ruled out, but isn't a defined feature.
+
+---
+
+## 2026-09 | Flutter kept, held to the same DJ-model rule as the web app
+
+Decision: the Flutter app is kept, not dropped or repurposed. In the meantime, it follows the same non-negotiable rule as the rest of the product: the DJ is never shown an embedded or hidden YouTube player, playback happens on the real YouTube app.
+
+Why: settles the "keep, repurpose, or drop" question that had been sitting open since Flutter was deprioritized behind the web-based game. Compliance with the DJ-model rule doesn't wait for a future repurposing decision, it applies now, the same way it already applies to the web app.
+
+---
+
+## 2026-09 | Story 30 medium difficulty: median of individual scores
+
+Decision: medium-difficulty group scoring (story 30) uses the median of the group's individual predicted scores.
+
+Why: easy already uses the group's lowest individual score (worst-case protection) and hard uses a plain average (no protection, opt-in). The median sits between the two without introducing a new weighting factor to tune.
+
+---
+
+## 2026-09 | YouTube Developer Policies read directly for story 35; a related metadataRaw constraint surfaced
+
+Decision: story 35 (the public ground-truth data API) is confirmed clear to ship as designed. Separately, any raw YouTube API Data (a video's title, description, channel name, view counts) that ends up persisted in `metadataRaw` needs its own delete-or-refresh cycle within 30 calendar days; it can't be kept indefinitely as-is.
+
+Why: read YouTube's actual Developer Policies directly rather than a summary. Section III.E.4.h prohibits substituting or deriving new metrics from YouTube's own numeric/engagement data, its own example is entirely about view and like counts, it says nothing about publishing an independently-sourced fact (artist, title, release year, all CC0 from MusicBrainz/Discogs/Wikidata) merely because a video's title or channel name was used as a lookup key to find it. Section III.E.4.c/d separately requires non-authorized API Data to be deleted or refreshed within 30 calendar days of storage, a real constraint on `metadataRaw`'s shape that wasn't on record before this read, unrelated to story 35's own data, which was never sourced from YouTube API Data in the first place.
+
+---
+
+## 2026-09 | Report and confirmation resolution: fully manual, ranked by a five-tier priority queue
+
+Decision: a submitted report never changes `verificationStatus` on its own, an admin decides every case manually. The admin review queue ranks cards by priority, not submission time: (1) converging reports, two or more independent reports on the same card suggesting the same year, ranked highest regardless of current status, including an already-`VERIFIED` card; (2) reported without convergence, a single report or several that disagree with each other, ranked below convergent reports by confidence tier; (3) unreported `NEEDS_REVIEW`/`MANUAL_ENTRY` cards with at least one community confirmation (a thumbs-up, distinct from a report, shown only on these two tiers), ranked by confirmation count, a fast confirm rather than research; (4) unreported cards with no confirmations, ranked by confidence tier alone; (5) `VERIFIED` cards with no report never enter the queue. Convergence is defined as two independent reports agreeing on the same year, not three. The review surface shows the admin the actual signals behind a card's rank (report count, whether they converge and on what year, confirmation count), not a single opaque score.
+
+Why: at this project's scale (100-200 users), full manual review is not a burden, and any automation that lets a report or a vote count flip `verificationStatus` on its own risks trusting a single anonymous claim, or a small group's coordinated votes, over reconciliation that already ran against real sources, against the project's own "professional-grade, not just working" standard. A confidence-only queue and a report/confirmation-blind queue were both considered and rejected: confidence alone ignores real evidence a report or a wave of confirmations represents, and treating every report identically regardless of convergence wastes review time on isolated, likely-mistaken reports ahead of ones where multiple people independently agree. The two-independent-reports convergence bar, not three, accounts for how few people are ever going to report the same niche song's error at this user scale; a higher bar would mean most genuine errors never reach it.
+
+---
+
+## 2026-09 | Multi-artist storage: ordered list with roles, equal for guessing, remix/cover/mashup split into their own songs
+
+Decision: a song's artists are an ordered list, each entry tagged `MAIN` or `FEATURED`. More than one `MAIN` artist is allowed, a joint credit like "Queen & David Bowie" has two, neither featured. The role tag is a display concern only: a physical card prints the main artist(s), then "featuring" the featured ones. For guessing and scoring, every artist on the list is treated identically, naming any single one correctly earns the token, not all of them. A `(feat. X)`/`(ft. X)` clause is stripped from the song title and its artist extracted into the list instead, superseding the AI microservice's existing title-cleaning rule, which currently keeps that clause in the title text. A remix, cover, or mashup clause is the only thing that survives in the title, and each becomes its own separate `Song`, its own artist list and release year, not a variant of the original; story 16's pgvector duplicate check must not treat one as a near-duplicate of the track it's based on.
+
+Why: a flat, equally-weighted list is simpler than modeling a strict single-main-plus-features hierarchy, and matches how real credits actually work, some songs have multiple co-equal artists with no featured credit at all. Keeping the main/featured role as display-only, rather than scoring-relevant, avoids penalizing a correct guess just because the player named the featured artist instead of the main one. Splitting a remix/cover/mashup into its own song follows from treating it as what it actually is, a different recording, often by a different artist, with its own release date, not the same song with an alternate title.
+
+---
+
+## 2026-09 | Session-long guess leaderboards, open to every player except the DJ
+
+Decision: every player except the DJ, the round's active player included, can submit a title/artist guess. The active player's guess works exactly as it already does, both correct earns the token, independent of placement correctness, either one wrong earns nothing. Every guess, active or not, also feeds two running per-player tallies for the session: "Most Artists Guessed" (every individual artist name correctly given, main or featured, from any song, counts once, regardless of how many total artists that song has) and "Most Titles Guessed" (every fully-correct title). Both leaderboards are shown alongside the main card-count ranking at session end.
+
+Why: the existing mechanic only lets the active player guess, meaning everyone else has no reason to pay attention to a round's title and artist at all. A second, token-independent leaderboard gives every player a reason to engage every round without changing the core token/betting economy, since these tallies never affect card ownership or win condition.
+
+---
+
+## 2026-09 | Story 30: country/language filter dropped in favor of a sitelinks-based international default, and public playlists
+
+Decision: a country/language filter dimension for difficulty-generated sessions is dropped. A difficulty-generated set defaults to international scope instead, a song counts as international if its Wikidata sitelinks count (the number of language-edition Wikipedia articles covering it) clears a threshold, decided once there's enough real catalog data to check it against, not guessed now. Separately, playing from an existing playlist now covers three cases: a playlist the player owns, one they're a member of, and one someone has published publicly for anyone to use, a new capability.
+
+Why: a dedicated country/language filter adds a real design and data-modeling surface (whether it's its own dimension, how it interacts with difficulty tiers) for a need the sitelinks-based international default already covers more simply, distinguishing a globally-known hit from a domestically-known one in the same language or country, without needing a separate filter a user has to think to apply. The sitelinks signal itself was already validated during the metadata-sourcing spike, this decision is about how to use it, not new testing. Public playlists exist because "select a playlist you have access to" was previously limited to ownership or membership, with no way for one person's curated set to reach anyone outside their own group.
+
+---
+

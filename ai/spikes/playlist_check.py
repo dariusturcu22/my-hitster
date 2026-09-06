@@ -17,14 +17,8 @@ from dotenv import dotenv_values
 import discogs_spike
 import musicbrainz_spike
 import wikidata_spike
-from _shared import (
-    DISCOGS_DELAY_SECONDS,
-    MUSICBRAINZ_DELAY_SECONDS,
-    USER_AGENT,
-    WIKIDATA_DELAY_SECONDS,
-    extract_year,
-    get_with_backoff,
-)
+import youtube_quota
+from _shared import USER_AGENT, extract_year, get_with_backoff
 
 _env = dotenv_values(Path(__file__).resolve().parent.parent / ".env")
 
@@ -32,12 +26,14 @@ RELEASED_ON_PATTERN = re.compile(r"Released on:\s*(?P<release_year>\d{4})-\d{2}-
 TOPIC_SUFFIX_PATTERN = re.compile(r"\s*-\s*Topic$")
 
 PLAYLIST_ITEMS_PAGE_SIZE = 50
+PLAYLIST_ITEMS_LIST_COST_UNITS = 1
 
 
 def fetch_playlist_items(playlist_id: str) -> list[dict]:
     items = []
     page_token = None
     while True:
+        youtube_quota.charge(PLAYLIST_ITEMS_LIST_COST_UNITS, operation="playlistItems.list")
         params = {
             "part": "snippet",
             "maxResults": PLAYLIST_ITEMS_PAGE_SIZE,
@@ -69,9 +65,6 @@ def extract_youtube_released_on(description: str | None) -> int | None:
 
 
 def check_musicbrainz(title: str, artist: str) -> int | None:
-    import time
-
-    time.sleep(MUSICBRAINZ_DELAY_SECONDS)
     data = musicbrainz_spike.search_release_group(title, artist)
     groups = data.get("release-groups", [])
     if not groups:
@@ -81,9 +74,6 @@ def check_musicbrainz(title: str, artist: str) -> int | None:
 
 
 def check_discogs(title: str, artist: str) -> int | None:
-    import time
-
-    time.sleep(DISCOGS_DELAY_SECONDS)
     results = discogs_spike.search_release(title, artist)
     releases = results.get("results", [])
     if not releases:
@@ -94,7 +84,6 @@ def check_discogs(title: str, artist: str) -> int | None:
 
     master_years = []
     for master_id in master_ids:
-        time.sleep(DISCOGS_DELAY_SECONDS)
         year = discogs_spike.master_year(discogs_spike.get_master(master_id))
         if year is not None:
             master_years.append(year)
@@ -102,14 +91,12 @@ def check_discogs(title: str, artist: str) -> int | None:
 
 
 def check_wikidata(title: str, artist: str) -> int | None:
-    import time
-
-    time.sleep(WIKIDATA_DELAY_SECONDS)
     matches = wikidata_spike.search_entity(title).get("search", [])
     if not matches:
         return None
     best = wikidata_spike.pick_best_match(matches, artist)
-    time.sleep(WIKIDATA_DELAY_SECONDS)
+    if best is None:
+        return None
     entity = wikidata_spike.get_entity(best["id"])["entities"][best["id"]]
     return extract_year(wikidata_spike.extract_publication_date(entity))
 
