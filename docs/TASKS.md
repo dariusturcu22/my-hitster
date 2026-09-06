@@ -625,3 +625,22 @@ Tests:
 - [ ] Integration test: the endpoint returns only verified songs, unverified songs never appear
 - [ ] Integration test: no YouTube-sourced field (`youtubeId` or anything derived from it) appears in the response shape
 - [ ] Unit tests for pagination and the rate limit, including boundary values
+
+## Story 28: UI redesign
+
+Checked against real code: the frontend today covers auth (login, register, forgot-password, OAuth2 redirect), a landing page, and the dashboard's playlist/song CRUD (playlist list, playlist detail, song list, song detail, add song, join-by-invite). Everything `GAME_DESIGN.md` already specs for gameplay (drag-and-drop timeline, guess box, betting, voice sidebar, chat overlay, DJ link-out, turn notifications, results/leaderboards) has no frontend code yet, since stories 10/11/12/13/39 haven't been implemented.
+
+Scope decided: one unified redesign pass covering both the existing pages and the not-yet-built gameplay screens, not two separate efforts. A fresh visual direction, not constrained to the current shadcn/Tailwind theme tokens, though the underlying component library stays unless a specific component doesn't hold up under the new direction. Mockups are built as a multi-artboard canvas via the `design` skill, reviewed before any implementation code is written.
+
+- [ ] Design phase: establish the fresh visual direction (color, type, spacing, component style) and apply it across every existing page: landing, login, register, forgot-password, dashboard/playlist list, playlist detail, song detail, add song, join-by-invite
+- [ ] Design phase: extend the same visual system to the gameplay screens `GAME_DESIGN.md` specs but that don't exist as code yet: group lobby (member list, admin crown, join code/link, settings), game session/timeline (drag-and-drop cards, guess box, token count, betting window), DJ view (open-in-YouTube link-out), voice sidebar, text chat overlay, turn notification banner, the minimized "playing while away" widget state, and the results/leaderboard screen
+- [ ] Review pass against every mockup with the project owner before implementation starts, checking each gameplay screen against `GAME_DESIGN.md`'s spec for anything the design missed
+- [ ] Implementation: apply the new visual system to the existing pages/components in `frontend/app` and `frontend/components`, replacing the current shadcn theme tokens with the new ones
+- [ ] Implementation: build the new gameplay screens as real Next.js components/routes; wire to stories 10/11/39's actual backend once those land, using representative mock state in the meantime so this doesn't block on their implementation timing
+- [ ] Decide and document the actual component/token boundary: shadcn stays as the underlying primitive library with new theme tokens, versus specific components getting replaced outright, per what the mockups actually need
+
+Tests:
+- [ ] Frontend test: each redesigned existing page renders without regression (a smoke test per route)
+- [ ] Frontend test: the new gameplay screens render correctly against representative mock state (empty, mid-game, varying player counts)
+- [ ] Frontend test: the drag-and-drop timeline placement and the guess box's animated feedback behave per `GAME_DESIGN.md`'s Interaction and animation section
+- [ ] Accessibility check: color contrast and keyboard navigation for the new visual direction, specifically the semi-transparent chat overlay and the voice sidebar
