@@ -30,7 +30,7 @@ Checked against real code: no session model exists, this is greenfield work. Bas
 - [ ] Guess placement and lock-in: before/after/between on the active player's timeline, with a lock-in sound effect
 - [ ] 3-5 second countdown after lock-in, then a 15-second betting window; skip the window entirely if no player holds a token
 - [ ] Betting: token-holding players may bet during the window, first come first served, concurrency-safe so only the first bet is accepted and a losing attempt doesn't cost a token; a skip-betting action ends the window early
-- [ ] Artist/title guess box, available to the active player for the whole turn, independent of timeline placement; a fully correct guess awards a token (matching tolerance is an open question, still being calibrated, see `PROJECT_STATE.md`). For a song with more than one artist (main or featured, story 23), naming any single one of them correctly is enough, not all of them
+- [ ] Artist/title guess box, available to the active player for the whole turn, independent of timeline placement; a fully correct guess awards a token, matching normalizes both strings (lowercase, strip punctuation, strip diacritics, collapse whitespace) and compares them with Damerau-Levenshtein edit distance, a flat budget of 1 regardless of length (see `DECISIONS.md`). For a song with more than one artist (main or featured, story 23), naming any single one of them correctly is enough, not all of them
 - [ ] Scoring: apply the four outcome rules in `GAME_DESIGN.md` (correct placement keeps the card even on a tied release year; a correct guess beats any bet; a wrong guess with a correct bet gives the card to the bettor; a wrong guess with no bet discards it)
 - [ ] Extend the artist/title guess box to every player except the DJ, not just the active player; a non-active player's guess never earns a token or affects placement/betting, it only counts toward the two session-long leaderboards below
 - [ ] Track two running per-player tallies for the session: total individual artists correctly named (every correct name, main or featured, from any song, adds one, regardless of how many total artists that song has) and total fully-correct title guesses
@@ -45,6 +45,7 @@ Checked against real code: no session model exists, this is greenfield work. Bas
 - [ ] Frontend: artist/title guess box gives immediate animated feedback, a correct guess animates a token dropping into the player's count, distinct animation for incorrect
 
 Tests:
+- [ ] Unit tests for the guess-matching function: normalization (punctuation, diacritics, whitespace) and the flat edit-distance-1 budget, covering both a correct-typo case and a same-distance wrong-word case (`DECISIONS.md`'s worked examples), plus the multi-artist any-one-correct rule
 - [ ] Unit tests for scoring: all four outcome rules, including the tied-release-year case
 - [ ] Unit tests for the two leaderboard tallies: a non-active player's guess updates them without touching tokens or placement; a multi-artist song credits a correct featured-artist name the same as a correct main-artist name
 - [ ] Unit tests for win-condition bounds: 5-20 (2-3 players) and 5-15 (4-8 players), including the boundary values
