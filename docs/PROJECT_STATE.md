@@ -40,7 +40,7 @@ A story can have draft tasks written against it in TASKS.md while still marked N
 | 25 | Add Discogs as a metadata source | Backend / AI | Ready, implementation validated in `ai/spikes/discogs_spike.py`, including a live-confirmed fallback fix for releases with no linked master |
 | 26 | Cache metadata pipeline results by artist/title or YouTube ID | Backend / AI | Ready |
 | 27 | Rate limiting | Backend | Ready |
-| 28 | UI redesign | Frontend | Needs Definition |
+| 28 | UI redesign | Frontend | Ready, one unified pass covering existing pages and the not-yet-built gameplay screens, fresh visual direction, see `DECISIONS.md` |
 | 29 | Content-based song recommender: audio-feature metadata (tempo, energy, valence), cosine similarity, works with zero user data | Backend / AI | Dropped, no viable audio-feature data source found (researched, see `TASKS.md`) |
 | 30 | Difficulty-tuned game session generation: on-the-spot card sets scored to a group's actual players, easy/medium/hard, defaults to international scope, absorbs story 21's card-assembly mechanics; playing from an existing playlist now also covers published-public ones | Backend / AI / Frontend | Needs Definition, draft tasks exist, confirmed blocked on story 10, no `Guess` entity exists yet for either the aggregate score or the personalized layer |
 | 31 | "Similar songs" feature using pgvector embeddings over song title and artist | Backend / AI | Dropped, only the audio-based version was worth building, see story 29 |
