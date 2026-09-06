@@ -131,19 +131,16 @@ def masterless_release_years(
     """A release with no master_id (Discogs reports this as 0, not a
     missing field, so find_master_ids' truthy check correctly excludes
     it) still often carries its own `year` field directly in the search
-    result. That's a real, if less authoritative, signal that was being
-    silently discarded entirely: live-tested on a niche single (Antonia's
-    "Marionette") where every one of several correct-year 2011 compilation
-    appearances had no master at all, and the only release that survived
-    the master-only path was an unrelated compilation that happened to
-    have one. Returns title/year pairs for releases find_master_ids would
-    otherwise drop, for the caller to merge in as lower-confidence
-    candidates alongside the master-based ones. A search result's own
-    `year` field comes back as a string ("2011"), unlike a master
-    resource's `year`, which is an int; cast here so callers can compare
-    or sort masterless years against master-based ones without a
-    str-vs-int mismatch, confirmed live: comparing them unconverted
-    raised a TypeError immediately."""
+    result, a real, if less authoritative, signal that would otherwise be
+    silently discarded entirely, a niche release can have every one of
+    its correct-year appearances lack a master while only an unrelated
+    release happens to have one. Returns title/year pairs for releases
+    find_master_ids would otherwise drop, for the caller to merge in as
+    lower-confidence candidates alongside the master-based ones. A
+    search result's own `year` field comes back as a string ("2011"),
+    unlike a master resource's `year`, which is an int; cast here so
+    callers can compare or sort masterless years against master-based
+    ones without a str-vs-int mismatch."""
     candidates = []
     for release in releases[:max_releases]:
         if release.get("master_id") or not release.get("year"):

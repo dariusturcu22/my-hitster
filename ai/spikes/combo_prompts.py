@@ -1,24 +1,21 @@
 """Prompt builders for the three LLM-combination scenarios: LLM+MusicBrainz
 only, LLM+Discogs only, and all three structured sources combined. Reads
 from response_cache.py's cached candidate data rather than making a live
-API call. Reviewed and approved by the user before use, don't reword the
-rules sections without a reason. See spikes/README.md.
+API call. See spikes/README.md.
 """
 
 _SHARED_TASK_INSTRUCTIONS = (
     "The response fields are enforced by a JSON schema, do not describe the JSON shape yourself."
 )
 
-# Confirmed live as a real reconciliation bug, not a hypothetical: without this
-# rule, the model picked whichever single candidate's title most literally
-# matched the song ("Antonia (10) - Marionette", 2012) instead of the earliest
-# year across that source's own full candidate list (2011, stated by seven
-# other Discogs candidates), then dismissed a correct source as "conflicting
-# with the primary catalogs" on the strength of that one cherry-picked,
-# wrong reading. Each source's own deterministic code already takes the
-# earliest year among its own candidates; the reconciliation prompt needs to
-# say so explicitly too, rather than leaving the model to guess which single
-# candidate represents that source's "answer."
+# Without this rule, a reconciliation model can pick whichever single
+# candidate's title most literally matches the song instead of the
+# earliest year across that source's own full candidate list, then
+# dismiss a source with a correct but non-matching-title candidate as
+# unreliable. Each source's own deterministic code already takes the
+# earliest year among its own candidates; the reconciliation prompt needs
+# to say so explicitly too, rather than leaving the model to guess which
+# single candidate represents that source's answer.
 _EARLIEST_CANDIDATE_PER_SOURCE_RULE = (
     "- within a single source's own candidate list, that source's answer is the EARLIEST year among "
     "ALL of its candidates, not just whichever one candidate's title happens to match the song title "
@@ -26,13 +23,10 @@ _EARLIEST_CANDIDATE_PER_SOURCE_RULE = (
     "its true original is the earliest one, scan the whole list before deciding what that source says"
 )
 
-# Confirmed live, a second, separate reconciliation bug behind the same
-# Marionette case: even after the rule above fixed how Discogs' own
-# candidates were read, the model still sided with MusicBrainz's 2012
-# over Discogs and Wikidata's 2011, reasoning that "MusicBrainz is
-# typically more reliable for track-level release dates." Nothing in
-# this prompt says that, it's an unstated prior the model brought on its
-# own, and here it was wrong, MusicBrainz had the incorrect date.
+# A reconciliation model can carry an unstated prior toward trusting one
+# source, typically MusicBrainz, as inherently more authoritative than
+# the others, and lean on that prior even when it contradicts the actual
+# candidate evidence. Nothing in this prompt should imply that ranking.
 _NO_SOURCE_AUTHORITY_BIAS_RULE = (
     "- do not treat any one source, including MusicBrainz, as inherently more authoritative than the "
     "others by default, weigh how many candidates within and across sources actually agree on a year, "
@@ -142,12 +136,12 @@ def build_wikipedia_extraction_prompt(title: str, artist: str, entries: list[dic
     do; Wikipedia was the one source missing it, since it used to only
     ever look up the song's own article.
 
-    The cover-attribution rule below exists because of a live, confirmed
-    failure: "Tainted Love"'s Wikipedia article states Gloria Jones
-    originally recorded it in 1964 and Soft Cell's cover made it famous
-    in 1981, both years in the same short paragraph, and extraction
-    picked 1964, the wrong artist's date, over 1981, the one actually
-    asked about."""
+    A Wikipedia article covering a song's full history can state a date
+    for an original artist's earlier recording and a separate date for a
+    later cover in the same short paragraph; the cover-attribution rule
+    below exists to keep extraction pinned to the specific artist being
+    asked about instead of whichever date happens to be mentioned
+    first."""
     if not entries:
         sections = "=== WIKIPEDIA ===\n(no article extract available)"
     else:

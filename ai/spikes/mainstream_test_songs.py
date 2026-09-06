@@ -4,7 +4,7 @@ three batches' adversarial/niche lean with more ordinary hits, the same
 reasoning as the second batch's "ordinary" tier: a ratio or accuracy
 number derived only from hard cases skews toward whatever handles chaos
 best, not what handles a normal playlist best. Ground truth researched
-via web search against each song's own Wikipedia article, not guessed.
+via web search against each song's own Wikipedia article.
 One deliberate single-vs-album trap included ("Smooth Criminal", single
 1988, parent album "Bad" 1987, earlier). See spikes/README.md.
 """

@@ -2,9 +2,9 @@
 MusicBrainz-only and Wikipedia-only (fetch + DeepSeek extraction), pulling
 from one shared queue of all 70 songs, each lane grabbing the next song
 the moment it's free rather than a fixed pre-assigned split. Reuses every
-answer already computed and cached this session (no new API or LLM calls
-needed for correctness), but each lane sleeps for its own real observed
-per-song duration before "returning" its cached answer, so the dispatch
+answer already computed and cached (no new API or LLM calls needed for
+correctness), but each lane sleeps for its own real observed per-song
+duration before "returning" its cached answer, so the dispatch
 pattern, how many songs each lane actually ends up handling, reflects
 genuine relative speed: MusicBrainz's plain API calls versus Wikipedia's
 fetch-plus-LLM-extraction round trip, not an arbitrary 50/50 assumption.
@@ -21,12 +21,10 @@ import time
 import response_cache
 from all_songs import ALL_SONGS, GROUND_TRUTH
 
-# Empirically grounded, not guessed: MusicBrainz's own paced delay is
-# ~1.49s/call (67% of the documented 60/min ceiling), averaging close to
-# 2 calls/song (track + album) across this session's runs. Wikipedia's
-# fetch is fast (~0.3-0.6s/call, confirmed in run_full_wikipedia.py's own
-# summary), but its LLM extraction call is the real cost, this session's
-# extraction batches averaged several seconds per call once queuing and
+# MusicBrainz's own paced delay is ~1.49s/call (67% of the documented
+# 60/min ceiling), averaging close to 2 calls/song (track + album).
+# Wikipedia's fetch is fast (~0.3-0.6s/call), but its LLM extraction call
+# is the real cost, averaging several seconds per call once queuing and
 # generation are counted.
 MUSICBRAINZ_SECONDS_PER_SONG = 3.0
 WIKIPEDIA_SECONDS_PER_SONG = 4.5

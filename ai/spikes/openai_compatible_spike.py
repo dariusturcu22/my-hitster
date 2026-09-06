@@ -26,15 +26,13 @@ from llm_schemas import LlmExtractionResult
 _env = dotenv_values(Path(__file__).resolve().parent.parent / ".env")
 
 STRUCTURED_OUTPUT_TEMPERATURE = 0.0
-# 0.1 previously; confirmed live that non-zero temperature produces real
-# run-to-run answer variance on close judgment calls (a Marionette
-# reconciliation flipped between two identical reruns), not just wording
-# differences in the reasoning field. 0 is the closest available lever to
-# deterministic, though some providers still aren't perfectly repeatable
-# even at 0 due to internal request batching.
+# Non-zero temperature produces real run-to-run answer variance on close
+# reconciliation calls, not just wording differences in the reasoning
+# field. 0 is the closest available lever to deterministic, though some
+# providers still aren't perfectly repeatable even at 0 due to internal
+# request batching.
 # A hung provider-side request otherwise waits forever, the SDK sets no
-# default; confirmed live with DeepInfra's Nemotron-3-Super, one request
-# never returned and never errored, stalling an entire batch run.
+# default timeout of its own.
 REQUEST_TIMEOUT_SECONDS = 90.0
 
 # base_url=None means the provider's own default (OpenAI itself).

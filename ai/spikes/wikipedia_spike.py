@@ -105,36 +105,30 @@ def select_best_page(
     search_results: list[dict], title: str, artist: str, query_type: str = "track"
 ) -> dict | None:
     """Wikipedia's own naming convention already disambiguates a song from
-    its own same-titled album ("Hot (Inna song)" vs. "Hot (Inna album)"),
-    unlike Wikidata or MusicBrainz, which both needed real disambiguation
-    logic against ambiguous or absent type metadata. But that preference
-    only matters among results that are actually about this title in the
-    first place: filters to results whose own title contains the query
-    title before applying any type preference, otherwise an unrelated
-    same-artist song ranking in the top few results (for example
-    "Together Forever (Rick Astley song)" showing up for a "Never Gonna
-    Give You Up" search) gets picked just for having "song" in its title,
-    confirmed as a real failure mode live-testing this against the
-    49-song set, not a hypothetical.
+    its own same-titled album (a song article's parenthetical says
+    "song"/"single", an album's says "album"), unlike Wikidata or
+    MusicBrainz, which both needed real disambiguation logic against
+    ambiguous or absent type metadata. That preference only matters among
+    results that are actually about this title in the first place:
+    filters to results whose own title contains the query title before
+    applying any type preference, otherwise an unrelated same-artist song
+    ranking in the top few results can get picked just for having "song"
+    in its title.
 
     query_type flips which parenthetical is preferred: "track" (the
     default) prefers "song"/"single"; "album" prefers "album"/"ep"
-    instead, and specifically avoids "song"/"single" results, needed once
-    album lookups started reusing this same function (see
-    run_full_wikipedia.py), an unrelated same-titled film ("A Night at
-    the Opera (film)", not the Queen album) was picked before this
-    existed, since the old track-only preference had no reason to avoid
-    it either.
+    instead, and specifically avoids "song"/"single" results. Album
+    lookups need the opposite preference from track lookups, an
+    unrelated same-titled work in a different medium can otherwise be
+    picked over the actual album.
 
-    When no result's title even contains the query title (a real case:
-    some niche tracks, like a vaporwave cult release found in this
-    project's own test set, have no dedicated article, only their parent
-    album's, and some albums, like a Filipino rock album also in this
-    project's test set, have no dedicated article at all), the type
-    preference isn't applied at all, that risks the exact same
-    wrong-result failure the title-matching filter exists to prevent.
-    Trusts Wikipedia's own relevance ranking (the top search result)
-    instead, rather than guessing."""
+    When no result's title even contains the query title (some tracks
+    have no dedicated article at all, only their parent album's, and
+    some albums have no dedicated article either), the type preference
+    isn't applied at all, that risks the exact same wrong-result failure
+    the title-matching filter exists to prevent. Trusts Wikipedia's own
+    relevance ranking (the top search result) instead, rather than
+    guessing."""
     if not search_results:
         return None
 

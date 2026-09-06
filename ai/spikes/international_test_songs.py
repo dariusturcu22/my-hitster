@@ -1,28 +1,26 @@
 """Third batch for calibrating the fast-tier MusicBrainz/Discogs traffic
-split. Romanian pop, manele, and other regional/niche songs, per direct
-user request rather than the mostly Western/mainstream mix the first two
-batches leaned on. Ground truth researched here via web search against
-each song's own Wikipedia article or, where Wikipedia had nothing,
-multiple independent platform listings (Spotify/Discogs/JioSaavn) agreeing
-on the same date; not guessed. Two entries (Hot, Mr. Saxobeat) are
-deliberately the single's release year, not its later album's, since
-that single-vs-album gap is exactly the kind of mislabeling the user
-flagged happening on mainstream platforms for this artist. Wikidata is
-deliberately excluded, same reasoning as the second batch. See
-spikes/README.md.
+split. Romanian pop, manele, and other regional/niche songs, rounding
+out the mostly Western/mainstream mix the first two batches leaned on.
+Ground truth researched via web search against each song's own
+Wikipedia article or, where Wikipedia had nothing, multiple independent
+platform listings (Spotify/Discogs/JioSaavn) agreeing on the same date.
+Two entries (Hot, Mr. Saxobeat) are deliberately the single's release
+year, not its later album's, a single-vs-album gap known to cause
+mislabeling on mainstream platforms for these specific releases.
+Wikidata is deliberately excluded, same reasoning as the second batch.
+See spikes/README.md.
 
-Manele coverage on Wikipedia turned out thin: most artists' pages list
-only a hit-song rundown with no dated per-song discography, several
+Manele coverage on Wikipedia is thin: most artists' pages list only a
+hit-song rundown with no dated per-song discography, and several
 otherwise-strong-looking song titles couldn't be pinned to a reliable
-date and were left out rather than guessed at. That thinness is itself
-a real data point for how MusicBrainz/Discogs are likely to perform on
-this category, worth noting when reading the results, not just a
-research inconvenience.
+date and were left out. That thinness is itself a real data point for
+how MusicBrainz/Discogs are likely to perform on this category, worth
+noting when reading the results.
 """
 
 # (title, artist, album, tier, note)
 INTERNATIONAL_TEST_SONGS = [
-    ("Hot", "Inna", "Hot", "romanian-pop", "single released 2008-08-12, a full year before the 2009 album of the same name, the exact single-vs-album gap the user flagged as commonly wrong on streaming platforms for this artist"),
+    ("Hot", "Inna", "Hot", "romanian-pop", "single released 2008-08-12, a full year before the 2009 album of the same name, a single-vs-album gap known to cause mislabeling on streaming platforms for this artist"),
     ("Mr. Saxobeat", "Alexandra Stan", "Saxobeats", "romanian-pop", "single released 2010-09-12, the Saxobeats album followed in 2011, same single-vs-album gap as Hot"),
     ("Mor De Ochii Tai", "Florin Salam", None, "manele", "single, released 2015-05-22"),
     ("Jumatate Tu, Jumatate Eu", "Adrian Minune", None, "manele", "2003, one of his early-2000s breakout hits per his Wikipedia bio; no per-song discography page exists to cross-check against"),

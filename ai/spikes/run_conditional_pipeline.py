@@ -61,12 +61,12 @@ def run_one(title: str, artist: str, album: str | None) -> dict:
     discogs_candidates = response_cache.load("discogs", title, artist) or []
     wikidata_candidates = response_cache.load("wikidata", title, artist) or []
 
-    mb_year = source_earliest_year(musicbrainz_candidates)
-    dg_year = source_earliest_year(discogs_candidates)
-    wd_year = source_earliest_year(wikidata_candidates)
+    musicbrainz_year = source_earliest_year(musicbrainz_candidates)
+    discogs_year = source_earliest_year(discogs_candidates)
+    wikidata_year = source_earliest_year(wikidata_candidates)
 
-    if mb_year is not None and mb_year == dg_year == wd_year:
-        return {"release_year": mb_year, "route": "locked", "llm_calls": 0}
+    if musicbrainz_year is not None and musicbrainz_year == discogs_year == wikidata_year:
+        return {"release_year": musicbrainz_year, "route": "locked", "llm_calls": 0}
 
     wikipedia_entries = get_wikipedia_entries(title, artist, album)
     extraction_prompt = build_wikipedia_extraction_prompt(title, artist, wikipedia_entries)

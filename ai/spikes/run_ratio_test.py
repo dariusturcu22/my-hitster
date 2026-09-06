@@ -68,14 +68,18 @@ if __name__ == "__main__":
         print(f"=== [{song_index}/{len(RATIO_TEST_SONGS)}] [{tier}] {title!r} by {artist!r} ===")
 
         started_at = time.perf_counter()
-        mb_year = run_musicbrainz(title, artist, album)
+        musicbrainz_year = run_musicbrainz(title, artist, album)
         source_seconds["MusicBrainz"] += time.perf_counter() - started_at
-        mb_outcome = "no answer" if mb_year is None else ("correct" if mb_year in acceptable_years else f"WRONG ({mb_year})")
-        if mb_year is None:
+        musicbrainz_outcome = (
+            "no answer"
+            if musicbrainz_year is None
+            else ("correct" if musicbrainz_year in acceptable_years else f"WRONG ({musicbrainz_year})")
+        )
+        if musicbrainz_year is None:
             musicbrainz_no_answer += 1
-        elif mb_year in acceptable_years:
+        elif musicbrainz_year in acceptable_years:
             musicbrainz_correct += 1
-        print(f"  MusicBrainz: {mb_year} [{mb_outcome}]")
+        print(f"  MusicBrainz: {musicbrainz_year} [{musicbrainz_outcome}]")
 
         started_at = time.perf_counter()
         discogs_year = run_discogs(title, artist, album)
