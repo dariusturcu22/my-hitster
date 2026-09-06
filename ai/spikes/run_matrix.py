@@ -28,7 +28,7 @@ SONGS = [
     ("Never Gonna Give You Up", "Rick Astley", "Whenever You Need Somebody", "sanity", ""),
     ("Bohemian Rhapsody", "Queen", "A Night at the Opera", "sanity", ""),
     ("リサフランク420 / 現代のコンピュー", "Macintosh Plus", "Floral Shoppe", "sanity", "vaporwave cult release, real stylized title, not romanized"),
-    ("Dragostea Din Tei", "O-Zone", "DiscO-Zone", "sanity", "Romanian-language, but an international hit; album title found via Wikidata's P361 link on the song entity, not guessed"),
+    ("Dragostea Din Tei", "O-Zone", "DiscO-Zone", "sanity", "Romanian-language, but an international hit; album title found via Wikidata's P361 link on the song entity"),
 
     # --- reissue / multiple-pressing history: real risk of disagreeing "first release" years ---
     ("Blue Monday", "New Order", None, "reissue", "1983 12\" single, deliberately never on the contemporaneous studio album; multiple distinct CD reissues since"),
@@ -45,7 +45,7 @@ SONGS = [
     # --- thin / partial coverage: expect at least one source to come up empty ---
     ("Alpha and Omega", "Boards of Canada", None, "partial-coverage", "promo-only release, thinner catalog presence than a standard single"),
     ("Palm Mall", "猫 シ Corp", None, "partial-coverage", "self-released vaporwave, minimal label-driven metadata trail"),
-    ("Solar Will", "Enslaved", "Mið", "partial-coverage", "single released days before this test was written, parent album not out until 2026-10-30; sources may not have caught up yet"),
+    ("Solar Will", "Enslaved", "Mið", "partial-coverage", "single released only days before the parent album's 2026-10-30 release; sources may not have caught up yet"),
     ("New Religion", "Bebe Rexha", None, "partial-coverage", "a feat.-credit single released the same week as this test; artist string deliberately excludes Faithless to test how a partial credit is handled"),
 
     # --- title collision: same title as a different, unrelated work ---
