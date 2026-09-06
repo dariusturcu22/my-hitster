@@ -125,6 +125,37 @@ def master_year(master: dict) -> int | None:
     return year if year else None
 
 
+def masterless_release_years(
+    releases: list[dict], max_releases: int = MAX_RELEASES_TO_SCAN_FOR_MASTERS
+) -> list[dict]:
+    """A release with no master_id (Discogs reports this as 0, not a
+    missing field, so find_master_ids' truthy check correctly excludes
+    it) still often carries its own `year` field directly in the search
+    result. That's a real, if less authoritative, signal that was being
+    silently discarded entirely: live-tested on a niche single (Antonia's
+    "Marionette") where every one of several correct-year 2011 compilation
+    appearances had no master at all, and the only release that survived
+    the master-only path was an unrelated compilation that happened to
+    have one. Returns title/year pairs for releases find_master_ids would
+    otherwise drop, for the caller to merge in as lower-confidence
+    candidates alongside the master-based ones. A search result's own
+    `year` field comes back as a string ("2011"), unlike a master
+    resource's `year`, which is an int; cast here so callers can compare
+    or sort masterless years against master-based ones without a
+    str-vs-int mismatch, confirmed live: comparing them unconverted
+    raised a TypeError immediately."""
+    candidates = []
+    for release in releases[:max_releases]:
+        if release.get("master_id") or not release.get("year"):
+            continue
+        try:
+            year = int(release["year"])
+        except (TypeError, ValueError):
+            continue
+        candidates.append({"title": release.get("title"), "year": year})
+    return candidates
+
+
 if __name__ == "__main__":
     if len(sys.argv) != 3:
         print("usage: discogs_spike.py <title> <artist>")

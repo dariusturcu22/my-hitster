@@ -13,7 +13,6 @@ import sys
 sys.path.insert(0, ".")
 
 from openai_compatible_spike import build_smoke_test_prompt, extract
-from bedrock_spike import extract as bedrock_extract
 
 GROUND_TRUTH: dict[str, tuple[int, ...]] = {
     "Never Gonna Give You Up": (1987,),
@@ -64,7 +63,7 @@ CANDIDATES = [
     ("openai", "gpt-5-mini"),
     ("groq", "openai/gpt-oss-20b"),
     ("deepinfra", "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo"),
-    ("bedrock", "nova-micro"),
+    ("llamacpp", "Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf"),
 ]
 
 
@@ -76,7 +75,7 @@ def run_candidate(provider: str, model: str) -> tuple[int, int, int]:
         artist = ARTISTS[title]
         prompt = build_smoke_test_prompt(title, artist)
         try:
-            result = bedrock_extract(prompt) if provider == "bedrock" else extract(provider, model, prompt)
+            result = extract(provider, model, prompt)
         except Exception as error:
             print(f"    {title!r}: ERROR ({error})")
             no_answer += 1
