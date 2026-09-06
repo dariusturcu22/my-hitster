@@ -424,6 +424,18 @@ Why: a dedicated country/language filter adds a real design and data-modeling su
 
 ---
 
+## 2026-09 | Typo-tolerance threshold for in-round title/artist guesses: normalized, flat edit-distance budget of 1
+
+Decision: a title or artist guess is checked against the canonical answer by normalizing both strings (lowercase, strip all punctuation, strip diacritics, collapse out all whitespace) and comparing the result with Damerau-Levenshtein edit distance, where an adjacent-letter transposition counts as one edit rather than two. A guess counts as correct at an edit distance of 1 or less; anything higher fails, regardless of how long the title or artist name is. This applies identically to the title guess and to each artist-name guess, naming any single artist correctly on a multi-artist song already earns the token per the existing rule.
+
+No separate word-count, word-order, or per-word-ratio rule is needed: normalizing away spacing and punctuation before computing a single whole-string edit distance already produces the right answer for every calibration example worked through, including cases that originally looked like they needed their own handling. A missing word ("Beatles" for "The Beatles"), a reordered pair ("Rhapsody Bohemian"), and an added word ("Bohemian Rhapsody Song") all land at an edit distance well past 1 once compared as one string, without a dedicated rule for any of them. A short, unrelated real word swapped in for another ("App" for "Up", "and" for "N'" in "Guns N' Roses") fails the same way a long word's typo passes: the rule cares about edit distance, not word length or meaning, so "Guns and Roses" does not count as correct.
+
+A length-scaling budget (more characters allowing more tolerated edits) was tested directly against real examples up to 8 words and 30+ characters, two independent one-letter typos in a title of that length still did not count as correct. The crossover point where a longer title would earn budget for a second typo, if one exists at all, sits above the length of nearly any real song title or artist name in this catalog, so scaling was dropped in favor of a flat budget of 1 everywhere.
+
+Why: the mechanism was already decided as edit-distance/fuzzy matching, not semantic or ML-based, so a rule has to hold up character by character, not by recognizing that "N'" means "and." A flat, unscaled budget of 1 is also the simplest rule that fits every calibration example from both sessions, and calibration explicitly tested and rejected the alternative (scaling with length) rather than assuming it away.
+
+---
+
 ## 2026-09 | Story 28 scoped: one unified redesign pass, fresh visual direction
 
 Decision: story 28's UI redesign covers the existing implemented pages (landing, auth, dashboard/playlist and song CRUD) and the not-yet-built gameplay screens `GAME_DESIGN.md` already specs (timeline, guess box, voice sidebar, chat overlay, DJ view, results/leaderboards) in one unified pass, not two separate efforts. The visual direction starts fresh rather than building on the current shadcn/Tailwind theme tokens, though the underlying shadcn component library stays unless a specific component doesn't hold up under the new direction. Mockups are built as a multi-artboard canvas through the `design` skill (Claude Design's canvas editor, available directly in this environment) rather than an external tool, reviewed before any implementation code is written.
