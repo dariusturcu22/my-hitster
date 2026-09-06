@@ -13,6 +13,9 @@ ai/local-llm/
 
 # --- Local runtime state for spike scripts ---
 ai/spikes/.youtube_quota_state.json
+ai/spikes/.source_response_cache_*.json
+ai/spikes/.llm_combo_results_*.json
+ai/spikes/.mainstream_wikipedia_extraction.json
 
 # --- Environment Secrets ---
 .env
